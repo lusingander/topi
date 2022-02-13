@@ -9,7 +9,10 @@ import (
 
 func Load(filepath string) (*topi.Document, error) {
 	ctx := context.Background()
-	loader := openapi3.Loader{Context: ctx}
+	loader := openapi3.Loader{
+		Context:               ctx,
+		IsExternalRefsAllowed: true,
+	}
 	doc, err := loader.LoadFromFile(filepath)
 	if err != nil {
 		return nil, err
