@@ -2,7 +2,6 @@ package openapi
 
 import (
 	"context"
-	"sort"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/lusingander/topi/internal/topi"
@@ -22,11 +21,9 @@ func Load(filepath string) (*topi.Document, error) {
 }
 
 func convert(t *openapi3.T) *topi.Document {
-	ret := &topi.Document{
-		TagPathMap: convertPaths(t.Paths),
-		Tags:       convertTags(t.Tags),
-	}
-	return ret
+	paths := convertPaths(t.Paths)
+	tags := convertTags(t.Tags)
+	return topi.NewDocument(paths, tags)
 }
 
 func convertPaths(paths openapi3.Paths) map[string][]*topi.Path {
@@ -94,6 +91,5 @@ func convertTags(tags openapi3.Tags) []*topi.Tag {
 		}
 		ret = append(ret, t)
 	}
-	sort.Slice(ret, func(i, j int) bool { return ret[i].Name < ret[j].Name })
 	return ret
 }
