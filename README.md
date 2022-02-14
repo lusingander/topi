@@ -4,7 +4,7 @@ Terminal OpenAPI documentation viewer 🐐
 
 ## About
 
-topi is the viewer for OpenAPI 3.0 definitions in the terminal.
+topi is the viewer for OpenAPI v3 definitions in the terminal.
 
 ## Installation
 
@@ -13,3 +13,7 @@ topi is the viewer for OpenAPI 3.0 definitions in the terminal.
 ## Usage
 
 `$ topi <spec path>`
+
+## License
+
+MIT
