@@ -1,6 +1,7 @@
 package topi
 
 import (
+	"net/http"
 	"sort"
 	"strings"
 )
@@ -52,7 +53,19 @@ func comparePath(p1, p2 *Path) bool {
 			return p1Paths[i] < p2Paths[i]
 		}
 	}
-	return p1.Method < p2.Method
+	return httpMethod[p1.Method] < httpMethod[p2.Method]
+}
+
+var httpMethod = map[string]int{
+	http.MethodGet:     0,
+	http.MethodHead:    1,
+	http.MethodPost:    2,
+	http.MethodPut:     3,
+	http.MethodPatch:   4,
+	http.MethodDelete:  5,
+	http.MethodConnect: 6,
+	http.MethodOptions: 7,
+	http.MethodTrace:   8,
 }
 
 type Tag struct {
