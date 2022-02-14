@@ -2,6 +2,7 @@ package openapi
 
 import (
 	"context"
+	"sort"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/lusingander/topi/internal/topi"
@@ -84,13 +85,15 @@ func mergeMap(m1, m2 map[string][]*topi.Path) map[string][]*topi.Path {
 	return ret
 }
 
-func convertTags(tags openapi3.Tags) map[string]*topi.Tag {
-	ret := make(map[string]*topi.Tag)
+func convertTags(tags openapi3.Tags) []*topi.Tag {
+	ret := make([]*topi.Tag, 0)
 	for _, tag := range tags {
-		ret[tag.Name] = &topi.Tag{
+		t := &topi.Tag{
 			Name:        tag.Name,
 			Description: tag.Description,
 		}
+		ret = append(ret, t)
 	}
+	sort.Slice(ret, func(i, j int) bool { return ret[i].Name < ret[j].Name })
 	return ret
 }

@@ -2,7 +2,7 @@ package topi
 
 type Document struct {
 	TagPathMap map[string][]*Path
-	Tags       map[string]*Tag
+	Tags       []*Tag
 }
 
 type Path struct {

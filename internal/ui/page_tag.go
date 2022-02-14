@@ -22,12 +22,12 @@ func newTagPageModel(doc *topi.Document) tagPageModel {
 
 func (tagPageModel) buildItems(doc *topi.Document) []list.Item {
 	tags := doc.Tags
-	ret := make([]list.Item, 0)
-	for _, tag := range tags {
-		i := tagPageListItem{tag}
-		ret = append(ret, i)
+	items := make([]list.Item, len(tags))
+	for i, tag := range tags {
+		item := tagPageListItem{tag}
+		items[i] = item
 	}
-	return ret
+	return items
 }
 
 func (m *tagPageModel) SetSize(w, h int) {
