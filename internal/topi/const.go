@@ -1,5 +1,5 @@
 package topi
 
 const (
-	AppName = "TOPI"
+	AppName = "topi"
 )
