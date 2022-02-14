@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/lusingander/topi/internal/topi"
@@ -8,16 +9,31 @@ import (
 
 type tagPageModel struct {
 	list          list.Model
+	delegateKeys  tagPageDelegateKeyMap
 	width, height int
 }
 
 func newTagPageModel(doc *topi.Document) tagPageModel {
 	m := tagPageModel{}
+	m.delegateKeys = newTagPageDelegateKeyMap()
 	items := m.buildItems(doc)
 	delegate := newTagPageListDelegate()
 	m.list = list.New(items, delegate, 0, 0)
 	m.list.Title = topi.AppName
 	return m
+}
+
+type tagPageDelegateKeyMap struct {
+	sel key.Binding
+}
+
+func newTagPageDelegateKeyMap() tagPageDelegateKeyMap {
+	return tagPageDelegateKeyMap{
+		sel: key.NewBinding(
+			key.WithKeys("enter"),
+			key.WithHelp("enter", "select"),
+		),
+	}
 }
 
 func (tagPageModel) buildItems(doc *topi.Document) []list.Item {
@@ -40,6 +56,14 @@ func (m tagPageModel) Init() tea.Cmd {
 }
 
 func (m tagPageModel) Update(msg tea.Msg) (tagPageModel, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, m.delegateKeys.sel):
+			tag := m.list.SelectedItem().(tagPageListItem).tag
+			return m, selectTag(tag.Name)
+		}
+	}
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd
