@@ -19,6 +19,13 @@ func (i tagPageListItem) FilterValue() string {
 	return i.tag.Name
 }
 
+func (i tagPageListItem) desc() string {
+	if i.tag.Description == "" {
+		return "-"
+	}
+	return i.tag.Description
+}
+
 type tagPageListDelegate struct{}
 
 var _ list.ItemDelegate = (*tagPageListDelegate)(nil)
@@ -44,7 +51,7 @@ func (d tagPageListDelegate) Render(w io.Writer, m list.Model, index int, item l
 	selected := index == m.Index()
 
 	title := i.tag.Name
-	desc := i.tag.Description
+	desc := i.desc()
 
 	if selected {
 		title = listSelectedTitleStyle.Render(title)

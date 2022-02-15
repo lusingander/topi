@@ -15,6 +15,7 @@ func NewDocument(tagPathMap map[string][]*Path, tags []*Tag) *Document {
 	for _, paths := range tagPathMap {
 		sortPaths(paths)
 	}
+	tags = mergeTags(tagPathMap, tags)
 	sortTags(tags)
 	return &Document{
 		TagPathMap: tagPathMap,
@@ -24,6 +25,28 @@ func NewDocument(tagPathMap map[string][]*Path, tags []*Tag) *Document {
 
 func sortPaths(paths []*Path) {
 	sort.Slice(paths, func(i, j int) bool { return comparePath(paths[i], paths[j]) })
+}
+
+func mergeTags(tagPathMap map[string][]*Path, tags []*Tag) []*Tag {
+	ret := tags
+	for tagName := range tagPathMap {
+		if !eixstTag(tagName, tags) {
+			tag := &Tag{
+				Name: tagName,
+			}
+			ret = append(ret, tag)
+		}
+	}
+	return ret
+}
+
+func eixstTag(name string, tags []*Tag) bool {
+	for _, tag := range tags {
+		if name == tag.Name {
+			return true
+		}
+	}
+	return false
 }
 
 func sortTags(tags []*Tag) {
