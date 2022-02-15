@@ -43,3 +43,28 @@ func TestSortPaths(t *testing.T) {
 		t.Errorf("got=%v, want=%v", paths, want)
 	}
 }
+
+func TestMergeTags(t *testing.T) {
+	tagPathMap := map[string][]*Path{
+		"foo": {
+			{UriPath: "/abc", Method: "GET"},
+			{UriPath: "/abc", Method: "POST"},
+		},
+		"bar": {
+			{UriPath: "/def/{xId}", Method: "POST"},
+		},
+	}
+	tags := []*Tag{
+		{"foo", "foo detail"},
+		{"baz", "baz detail"},
+	}
+	want := []*Tag{
+		{"foo", "foo detail"},
+		{"baz", "baz detail"},
+		{"bar", ""},
+	}
+	got := mergeTags(tagPathMap, tags)
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got=%v, want=%v", got, want)
+	}
+}
