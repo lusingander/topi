@@ -39,21 +39,34 @@ type Path struct {
 }
 
 func comparePath(p1, p2 *Path) bool {
-	// todo: fix logic
 	p1Paths := strings.Split(p1.UriPath, "/")
 	p2Paths := strings.Split(p2.UriPath, "/")
-	if len(p1Paths) < len(p2Paths) {
+	len1 := len(p1Paths)
+	len2 := len(p2Paths)
+	if len1 < len2 {
 		return true
 	}
-	if len(p1Paths) > len(p2Paths) {
+	if len1 > len2 {
 		return false
 	}
-	for i := 0; i < len(p1Paths); i++ {
+	for i := 0; i < len1; i++ {
 		if p1Paths[i] != p2Paths[i] {
-			return p1Paths[i] < p2Paths[i]
+			return comparePathElem(p1Paths[i], p2Paths[i])
 		}
 	}
 	return httpMethod[p1.Method] < httpMethod[p2.Method]
+}
+
+func comparePathElem(e1, e2 string) bool {
+	b1 := strings.HasPrefix(e1, "{")
+	b2 := strings.HasPrefix(e2, "{")
+	if b1 && !b2 {
+		return true
+	}
+	if !b1 && b2 {
+		return false
+	}
+	return e1 < e2
 }
 
 var httpMethod = map[string]int{
