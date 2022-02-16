@@ -38,10 +38,12 @@ func newTagPageDelegateKeyMap() tagPageDelegateKeyMap {
 
 func (tagPageModel) buildItems(doc *topi.Document) []list.Item {
 	tags := doc.Tags
-	items := make([]list.Item, len(tags))
-	for i, tag := range tags {
-		item := tagPageListItem{tag}
-		items[i] = item
+	items := make([]list.Item, 0)
+	for _, tag := range tags {
+		if len(doc.TagPathMap[tag.Name]) > 0 {
+			item := tagPageListItem{tag}
+			items = append(items, item)
+		}
 	}
 	return items
 }
