@@ -102,15 +102,12 @@ func (i tagApiPageListItem) styledTitle(selected bool) string {
 	return fmt.Sprintf("%s %s", padding.String(method, 7), path)
 }
 
-func (i tagApiPageListItem) styledDesc(selected bool) string {
-	var desc string
-	switch i.path.Method {
-	case http.MethodGet:
-	}
+func (i tagApiPageListItem) styledDesc(selected bool, width int) string {
+	desc := truncateWithTail(i.path.Summary, uint(width))
 	if selected {
-		desc = listSelectedDescColorStyle.Render(i.path.Summary)
+		desc = listSelectedDescColorStyle.Render(desc)
 	} else {
-		desc = listNormalDescColorStyle.Render(i.path.Summary)
+		desc = listNormalDescColorStyle.Render(desc)
 	}
 	return desc
 }
@@ -139,8 +136,10 @@ func (d tagApiPageListDelegate) Render(w io.Writer, m list.Model, index int, ite
 	i := item.(tagApiPageListItem)
 	selected := index == m.Index()
 
+	width := m.Width() - listNormalTitleStyle.GetPaddingLeft() - listNormalTitleStyle.GetPaddingRight()
+
 	title := i.styledTitle(selected)
-	desc := i.styledDesc(selected)
+	desc := i.styledDesc(selected, width)
 
 	if selected {
 		title = listSelectedItemStyle.Render(title)

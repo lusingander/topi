@@ -19,11 +19,11 @@ func (i tagPageListItem) FilterValue() string {
 	return i.tag.Name
 }
 
-func (i tagPageListItem) desc() string {
+func (i tagPageListItem) desc(width int) string {
 	if i.tag.Description == "" {
 		return "-"
 	}
-	return i.tag.Description
+	return truncateWithTail(i.tag.Description, uint(width))
 }
 
 type tagPageListDelegate struct{}
@@ -50,8 +50,10 @@ func (d tagPageListDelegate) Render(w io.Writer, m list.Model, index int, item l
 	i := item.(tagPageListItem)
 	selected := index == m.Index()
 
+	width := m.Width() - listNormalTitleStyle.GetPaddingLeft() - listNormalTitleStyle.GetPaddingRight()
+
 	title := i.tag.Name
-	desc := i.desc()
+	desc := i.desc(width)
 
 	if selected {
 		title = listSelectedTitleStyle.Render(title)
