@@ -7,11 +7,17 @@ import (
 
 type page interface{}
 
+type menuPage struct{}
+
+type infoPage struct{}
+
 type tagPage struct{}
 
 type tagApiPage struct {
 	tag string
 }
+
+type helpPage struct{}
 
 type pageStack struct {
 	stack []page
@@ -46,6 +52,7 @@ type model struct {
 
 	*pageStack
 
+	menuPage   menuPageModel
 	tagPage    tagPageModel
 	tagApiPage tagApiPageModel
 }
@@ -53,15 +60,18 @@ type model struct {
 var _ tea.Model = (*model)(nil)
 
 func newModel(doc *topi.Document) model {
+	startPage := menuPage{}
 	return model{
 		doc:        doc,
-		pageStack:  newPageStack(tagPage{}),
+		pageStack:  newPageStack(startPage),
+		menuPage:   newMenuPageModel(),
 		tagPage:    newTagPageModel(doc),
 		tagApiPage: newTagApiPageModel(doc),
 	}
 }
 
 func (m *model) SetSize(w, h int) {
+	m.menuPage.SetSize(w, h)
 	m.tagPage.SetSize(w, h)
 	m.tagApiPage.SetSize(w, h)
 }
@@ -81,18 +91,31 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		top, right, bottom, left := baseStyle.GetMargin()
 		m.SetSize(msg.Width-left-right, msg.Height-top-bottom)
+	case selectInfoMenuMsg:
+		m.pushPage(infoPage{})
+	case selectTagMenuMsg:
+		m.pushPage(tagPage{})
+	case selectHelpMenuMsg:
+		m.pushPage(helpPage{})
 	case selectTagMsg:
 		m.pushPage(tagApiPage(msg))
 	case goBackMsg:
 		m.popPage()
 	}
 	switch m.currentPage().(type) {
+	case menuPage:
+		m.menuPage, cmd = m.menuPage.Update(msg)
+		return m, cmd
+	case infoPage:
+		return m, cmd // todo: impl
 	case tagPage:
 		m.tagPage, cmd = m.tagPage.Update(msg)
 		return m, cmd
 	case tagApiPage:
 		m.tagApiPage, cmd = m.tagApiPage.Update(msg)
 		return m, cmd
+	case helpPage:
+		return m, cmd // todo: impl
 	default:
 		return m, nil
 	}
@@ -104,10 +127,16 @@ func (m model) View() string {
 
 func (m model) content() string {
 	switch m.currentPage().(type) {
+	case menuPage:
+		return m.menuPage.View()
+	case infoPage:
+		return "" // todo: impl
 	case tagPage:
 		return m.tagPage.View()
 	case tagApiPage:
 		return m.tagApiPage.View()
+	case helpPage:
+		return "" // todo: impl
 	default:
 		return "error... :("
 	}

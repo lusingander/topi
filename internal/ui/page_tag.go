@@ -24,11 +24,16 @@ func newTagPageModel(doc *topi.Document) tagPageModel {
 }
 
 type tagPageDelegateKeyMap struct {
-	sel key.Binding
+	back key.Binding
+	sel  key.Binding
 }
 
 func newTagPageDelegateKeyMap() tagPageDelegateKeyMap {
 	return tagPageDelegateKeyMap{
+		back: key.NewBinding(
+			key.WithKeys("backspace", "ctrl+h"),
+			key.WithHelp("backspace", "back"),
+		),
 		sel: key.NewBinding(
 			key.WithKeys("enter"),
 			key.WithHelp("enter", "select"),
@@ -61,6 +66,8 @@ func (m tagPageModel) Update(msg tea.Msg) (tagPageModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
+		case key.Matches(msg, m.delegateKeys.back):
+			return m, goBack
 		case key.Matches(msg, m.delegateKeys.sel):
 			tag := m.list.SelectedItem().(tagPageListItem).tag
 			return m, selectTag(tag.Name)
