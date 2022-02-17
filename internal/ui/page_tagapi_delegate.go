@@ -46,6 +46,24 @@ var (
 
 	tagApiPageMethodNormalPatchStyle = tagApiPageMethodStyle.Copy().
 						Foreground(lipgloss.Color("218"))
+
+	tagApiPageMethodDeprecatedStyle = tagApiPageMethodStyle.Copy().
+					Strikethrough(true)
+
+	tagApiPageMethodSelectedDeprecatedStyle = tagApiPageMethodDeprecatedStyle.Copy().
+						Foreground(lipgloss.Color("243"))
+
+	tagApiPageMethodNormalDeprecatedStyle = tagApiPageMethodDeprecatedStyle.Copy().
+						Foreground(lipgloss.Color("246"))
+
+	tagApiPagePathDeprecatedStyle = lipgloss.NewStyle().
+					Strikethrough(true)
+
+	tagApiPagePathSelectedDeprecatedStyle = tagApiPagePathDeprecatedStyle.Copy().
+						Foreground(selectedColor)
+
+	tagApiPagePathNormalDeprecatedStyle = tagApiPagePathDeprecatedStyle.Copy().
+						Foreground(lipgloss.Color("246"))
 )
 
 type tagApiPageListItem struct {
@@ -60,6 +78,16 @@ func (i tagApiPageListItem) FilterValue() string {
 
 func (i tagApiPageListItem) styledTitle(selected bool) string {
 	var method, path string
+	if i.path.Deprecated {
+		if selected {
+			method = tagApiPageMethodSelectedDeprecatedStyle.Render(i.path.Method)
+			path = tagApiPagePathSelectedDeprecatedStyle.Render(i.path.UriPath)
+		} else {
+			method = tagApiPageMethodNormalDeprecatedStyle.Render(i.path.Method)
+			path = tagApiPagePathNormalDeprecatedStyle.Render(i.path.UriPath)
+		}
+		return fmt.Sprintf("%s %s", padding.String(method, 7), path)
+	}
 	switch i.path.Method {
 	case http.MethodGet:
 		if selected {
