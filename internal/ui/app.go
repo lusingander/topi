@@ -5,17 +5,46 @@ import (
 	"github.com/lusingander/topi/internal/topi"
 )
 
-type page int
+type page interface{}
 
-const (
-	tagPage page = iota
-	tagApiPage
-)
+type tagPage struct{}
+
+type tagApiPage struct {
+	tag string
+}
+
+type pageStack struct {
+	stack []page
+}
+
+func newPageStack(p page) *pageStack {
+	return &pageStack{
+		stack: []page{p},
+	}
+}
+
+func (s *pageStack) pushPage(p page) {
+	s.stack = append(s.stack, p)
+}
+
+func (s *pageStack) popPage() page {
+	l := len(s.stack)
+	if l <= 1 {
+		return nil
+	}
+	p := s.stack[l-1]
+	s.stack = s.stack[:l-1]
+	return p
+}
+
+func (s *pageStack) currentPage() page {
+	return s.stack[len(s.stack)-1]
+}
 
 type model struct {
 	doc *topi.Document
 
-	currentPage page
+	*pageStack
 
 	tagPage    tagPageModel
 	tagApiPage tagApiPageModel
@@ -25,10 +54,10 @@ var _ tea.Model = (*model)(nil)
 
 func newModel(doc *topi.Document) model {
 	return model{
-		doc:         doc,
-		currentPage: tagPage,
-		tagPage:     newTagPageModel(doc),
-		tagApiPage:  newTagApiPageModel(doc),
+		doc:        doc,
+		pageStack:  newPageStack(tagPage{}),
+		tagPage:    newTagPageModel(doc),
+		tagApiPage: newTagApiPageModel(doc),
 	}
 }
 
@@ -53,11 +82,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		top, right, bottom, left := baseStyle.GetMargin()
 		m.SetSize(msg.Width-left-right, msg.Height-top-bottom)
 	case selectTagMsg:
-		m.currentPage = tagApiPage
-	case goBackTagPageMsg:
-		m.currentPage = tagPage
+		m.pushPage(tagApiPage(msg))
+	case goBackMsg:
+		m.popPage()
 	}
-	switch m.currentPage {
+	switch m.currentPage().(type) {
 	case tagPage:
 		m.tagPage, cmd = m.tagPage.Update(msg)
 		return m, cmd
@@ -74,7 +103,7 @@ func (m model) View() string {
 }
 
 func (m model) content() string {
-	switch m.currentPage {
+	switch m.currentPage().(type) {
 	case tagPage:
 		return m.tagPage.View()
 	case tagApiPage:

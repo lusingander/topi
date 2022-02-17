@@ -10,8 +10,8 @@ func selectTag(tag string) tea.Cmd {
 	return func() tea.Msg { return selectTagMsg{tag} }
 }
 
-type goBackTagPageMsg struct{}
+type goBackMsg struct{}
 
-func goBackTagPage() tea.Msg {
-	return goBackTagPageMsg{}
+func goBack() tea.Msg {
+	return goBackMsg{}
 }

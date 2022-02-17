@@ -64,7 +64,7 @@ func (m tagApiPageModel) Update(msg tea.Msg) (tagApiPageModel, tea.Cmd) {
 		switch {
 		case key.Matches(msg, m.delegateKeys.back):
 			if m.list.FilterState() != list.Filtering {
-				return m, goBackTagPage
+				return m, goBack
 			}
 		}
 	case selectTagMsg:
