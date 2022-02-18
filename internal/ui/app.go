@@ -53,6 +53,7 @@ type model struct {
 	*pageStack
 
 	menuPage   menuPageModel
+	infoPage   infoPageModel
 	tagPage    tagPageModel
 	tagApiPage tagApiPageModel
 }
@@ -64,6 +65,7 @@ func newModel(doc *topi.Document) model {
 	return model{
 		doc:        doc,
 		pageStack:  newPageStack(startPage),
+		infoPage:   newInfoPageModel(doc),
 		menuPage:   newMenuPageModel(),
 		tagPage:    newTagPageModel(doc),
 		tagApiPage: newTagApiPageModel(doc),
@@ -72,6 +74,7 @@ func newModel(doc *topi.Document) model {
 
 func (m *model) SetSize(w, h int) {
 	m.menuPage.SetSize(w, h)
+	m.infoPage.SetSize(w, h)
 	m.tagPage.SetSize(w, h)
 	m.tagApiPage.SetSize(w, h)
 }
@@ -107,7 +110,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.menuPage, cmd = m.menuPage.Update(msg)
 		return m, cmd
 	case infoPage:
-		return m, cmd // todo: impl
+		m.infoPage, cmd = m.infoPage.Update(msg)
+		return m, cmd
 	case tagPage:
 		m.tagPage, cmd = m.tagPage.Update(msg)
 		return m, cmd
@@ -130,7 +134,7 @@ func (m model) content() string {
 	case menuPage:
 		return m.menuPage.View()
 	case infoPage:
-		return "" // todo: impl
+		return m.infoPage.View()
 	case tagPage:
 		return m.tagPage.View()
 	case tagApiPage:

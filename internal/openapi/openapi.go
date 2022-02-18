@@ -21,9 +21,45 @@ func Load(filepath string) (*topi.Document, error) {
 }
 
 func convert(t *openapi3.T) *topi.Document {
+	info := convertInfo(t.OpenAPI, t.Info)
 	paths := convertPaths(t.Paths)
 	tags := convertTags(t.Tags)
-	return topi.NewDocument(paths, tags)
+	return topi.NewDocument(info, paths, tags)
+}
+
+func convertInfo(openapi string, info *openapi3.Info) *topi.Info {
+	contactName, contactUrl, contactEmail := convertInfoContact(info.Contact)
+	licenseName, licenseUrl := convertInfoLicense(info.License)
+	return &topi.Info{
+		OpenAPIVersion: openapi,
+		Title:          info.Title,
+		Description:    info.Description,
+		TermsOfService: info.TermsOfService,
+		ContactName:    contactName,
+		ContactUrl:     contactUrl,
+		ContactEmail:   contactEmail,
+		LicenseName:    licenseName,
+		LicenseUrl:     licenseUrl,
+		Version:        info.Version,
+	}
+}
+
+func convertInfoContact(c *openapi3.Contact) (name, url, email string) {
+	if c == nil {
+		name, url, email = "", "", ""
+	} else {
+		name, url, email = c.Name, c.URL, c.Email
+	}
+	return
+}
+
+func convertInfoLicense(l *openapi3.License) (name, url string) {
+	if l == nil {
+		name, url = "", ""
+	} else {
+		name, url = l.Name, l.URL
+	}
+	return
 }
 
 func convertPaths(paths openapi3.Paths) map[string][]*topi.Path {

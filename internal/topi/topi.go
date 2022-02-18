@@ -7,17 +7,19 @@ import (
 )
 
 type Document struct {
+	Info       *Info
 	TagPathMap map[string][]*Path
 	Tags       []*Tag
 }
 
-func NewDocument(tagPathMap map[string][]*Path, tags []*Tag) *Document {
+func NewDocument(info *Info, tagPathMap map[string][]*Path, tags []*Tag) *Document {
 	for _, paths := range tagPathMap {
 		sortPaths(paths)
 	}
 	tags = mergeTags(tagPathMap, tags)
 	sortTags(tags)
 	return &Document{
+		Info:       info,
 		TagPathMap: tagPathMap,
 		Tags:       tags,
 	}
@@ -51,6 +53,19 @@ func eixstTag(name string, tags []*Tag) bool {
 
 func sortTags(tags []*Tag) {
 	sort.Slice(tags, func(i, j int) bool { return tags[i].Name < tags[j].Name })
+}
+
+type Info struct {
+	OpenAPIVersion string
+	Title          string
+	Description    string
+	TermsOfService string
+	ContactName    string
+	ContactUrl     string
+	ContactEmail   string
+	LicenseName    string
+	LicenseUrl     string
+	Version        string
 }
 
 type Path struct {
