@@ -8,17 +8,19 @@ import (
 )
 
 type tagPageModel struct {
+	doc           *topi.Document
 	list          list.Model
 	delegateKeys  tagPageDelegateKeyMap
 	width, height int
 }
 
 func newTagPageModel(doc *topi.Document) tagPageModel {
-	m := tagPageModel{}
+	m := tagPageModel{
+		doc: doc,
+	}
 	m.delegateKeys = newTagPageDelegateKeyMap()
-	items := m.buildItems(doc)
 	delegate := newTagPageListDelegate()
-	m.list = list.New(items, delegate, 0, 0)
+	m.list = list.New(nil, delegate, 0, 0)
 	m.list.Title = topi.AppName
 	return m
 }
@@ -41,16 +43,20 @@ func newTagPageDelegateKeyMap() tagPageDelegateKeyMap {
 	}
 }
 
-func (tagPageModel) buildItems(doc *topi.Document) []list.Item {
-	tags := doc.Tags
+func (m *tagPageModel) updateItems() {
+	tags := m.doc.Tags
 	items := make([]list.Item, 0)
 	for _, tag := range tags {
-		if len(doc.TagPathMap[tag.Name]) > 0 {
+		if len(m.doc.TagPathMap[tag.Name]) > 0 {
 			item := tagPageListItem{tag}
 			items = append(items, item)
 		}
 	}
-	return items
+	m.list.SetItems(items)
+}
+
+func (m *tagPageModel) reset() {
+	m.list.ResetSelected()
 }
 
 func (m *tagPageModel) SetSize(w, h int) {
@@ -72,6 +78,10 @@ func (m tagPageModel) Update(msg tea.Msg) (tagPageModel, tea.Cmd) {
 			tag := m.list.SelectedItem().(tagPageListItem).tag
 			return m, selectTag(tag.Name)
 		}
+	case selectTagMenuMsg:
+		m.updateItems()
+		m.reset()
+		return m, nil
 	}
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
