@@ -30,8 +30,22 @@ var (
 				Foreground(lipgloss.Color("33")).
 				Underline(true)
 
+	infoPageSelectedUrlStyle = lipgloss.NewStyle().
+					Background(lipgloss.Color("250")).
+					Foreground(lipgloss.Color("56"))
+
 	infoPageItemStyle = lipgloss.NewStyle().
 				Padding(1, 2)
+)
+
+type infoPageSelectableItems int
+
+const (
+	infoPageSelectableNotSelected infoPageSelectableItems = iota
+	infoPageSelectableTermsOfService
+	infoPageSelectableContractUrl
+	infoPageSelectableLicenseUrl
+	numberOfItems // not item
 )
 
 type infoPageModel struct {
@@ -39,6 +53,8 @@ type infoPageModel struct {
 	viewport      viewport.Model
 	delegateKeys  infoPageDelegateKeyMap
 	width, height int
+
+	selected infoPageSelectableItems
 }
 
 func newInfoPageModel(doc *topi.Document) infoPageModel {
@@ -47,11 +63,15 @@ func newInfoPageModel(doc *topi.Document) infoPageModel {
 	}
 	m.delegateKeys = newInfoPageDelegateKeyMap()
 	m.viewport = viewport.New(0, 0)
+	m.selected = infoPageSelectableNotSelected
 	return m
 }
 
 type infoPageDelegateKeyMap struct {
-	back key.Binding
+	back        key.Binding
+	tab         key.Binding
+	shiftTab    key.Binding
+	openBrowser key.Binding
 }
 
 func newInfoPageDelegateKeyMap() infoPageDelegateKeyMap {
@@ -59,6 +79,18 @@ func newInfoPageDelegateKeyMap() infoPageDelegateKeyMap {
 		back: key.NewBinding(
 			key.WithKeys("backspace", "ctrl+h"),
 			key.WithHelp("backspace", "back"),
+		),
+		tab: key.NewBinding(
+			key.WithKeys("tab"),
+			key.WithHelp("tab", "select next item"),
+		),
+		shiftTab: key.NewBinding(
+			key.WithKeys("shift+tab"),
+			key.WithHelp("shift+tab", "select prev item"),
+		),
+		openBrowser: key.NewBinding(
+			key.WithKeys("x"),
+			key.WithHelp("x", "open in browser"),
 		),
 	}
 }
@@ -85,7 +117,13 @@ func (m *infoPageModel) updateContent() {
 	content.WriteString(titleBar)
 
 	if info.TermsOfService != "" {
-		tos := fmt.Sprintf("Terms of service: %s", infoPageUrlStyle.Render(info.TermsOfService))
+		url := info.TermsOfService
+		if m.selected == infoPageSelectableTermsOfService {
+			url = infoPageSelectedUrlStyle.Render(url)
+		} else {
+			url = infoPageUrlStyle.Render(url)
+		}
+		tos := fmt.Sprintf("Terms of service: %s", url)
 		content.WriteString(infoPageItemStyle.Render(tos))
 	}
 
@@ -98,7 +136,13 @@ func (m *infoPageModel) updateContent() {
 			}
 		}
 		if info.ContactUrl != "" {
-			buf.WriteString(infoPageUrlStyle.Render(info.ContactUrl))
+			url := info.ContactUrl
+			if m.selected == infoPageSelectableContractUrl {
+				url = infoPageSelectedUrlStyle.Render(url)
+			} else {
+				url = infoPageUrlStyle.Render(url)
+			}
+			buf.WriteString(url)
 			if info.ContactEmail != "" {
 				buf.WriteString(" / ")
 			}
@@ -113,7 +157,13 @@ func (m *infoPageModel) updateContent() {
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("License: %s", info.LicenseName))
 		if info.LicenseUrl != "" {
-			buf.WriteString(fmt.Sprintf(" (%s)", infoPageUrlStyle.Render(info.LicenseUrl)))
+			url := info.LicenseUrl
+			if m.selected == infoPageSelectableLicenseUrl {
+				url = infoPageSelectedUrlStyle.Render(url)
+			} else {
+				url = infoPageUrlStyle.Render(url)
+			}
+			buf.WriteString(fmt.Sprintf(" (%s)", url))
 		}
 		content.WriteString(infoPageItemStyle.Render(buf.String()))
 	}
@@ -123,6 +173,43 @@ func (m *infoPageModel) updateContent() {
 	content.WriteString(desc)
 
 	m.viewport.SetContent(content.String())
+}
+
+func (m *infoPageModel) selectItem(reverse bool) {
+	if reverse {
+		m.selected = ((m.selected-1)%numberOfItems + numberOfItems) % numberOfItems
+	} else {
+		m.selected = (m.selected + 1) % numberOfItems
+	}
+	switch m.selected {
+	case infoPageSelectableTermsOfService:
+		if m.doc.Info.TermsOfService == "" {
+			m.selectItem(reverse)
+		}
+	case infoPageSelectableContractUrl:
+		if m.doc.Info.ContactUrl == "" {
+			m.selectItem(reverse)
+		}
+	case infoPageSelectableLicenseUrl:
+		if m.doc.Info.LicenseUrl == "" {
+			m.selectItem(reverse)
+		}
+	default:
+		m.selected = infoPageSelectableNotSelected
+	}
+}
+
+func (m infoPageModel) openInBrowser() error {
+	switch m.selected {
+	case infoPageSelectableTermsOfService:
+		return openInBrowser(m.doc.Info.TermsOfService)
+	case infoPageSelectableContractUrl:
+		return openInBrowser(m.doc.Info.ContactUrl)
+	case infoPageSelectableLicenseUrl:
+		return openInBrowser(m.doc.Info.LicenseUrl)
+	default:
+		return nil // do nothing
+	}
 }
 
 func (m infoPageModel) Init() tea.Cmd {
@@ -135,6 +222,17 @@ func (m infoPageModel) Update(msg tea.Msg) (infoPageModel, tea.Cmd) {
 		switch {
 		case key.Matches(msg, m.delegateKeys.back):
 			return m, goBack
+		case key.Matches(msg, m.delegateKeys.tab):
+			m.selectItem(false)
+			m.updateContent()
+			return m, nil
+		case key.Matches(msg, m.delegateKeys.shiftTab):
+			m.selectItem(true)
+			m.updateContent()
+			return m, nil
+		case key.Matches(msg, m.delegateKeys.openBrowser):
+			m.openInBrowser() // todo: handle error
+			return m, nil
 		}
 	case selectInfoMenuMsg:
 		m.updateContent()

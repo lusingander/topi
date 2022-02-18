@@ -9,6 +9,7 @@ require (
 	github.com/charmbracelet/lipgloss v0.5.0
 	github.com/getkin/kin-openapi v0.89.0
 	github.com/muesli/reflow v0.3.0
+	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
 )
 
 require (
