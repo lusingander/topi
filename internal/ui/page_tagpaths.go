@@ -26,11 +26,16 @@ func newTagPathsPageModel(doc *topi.Document) tagPathsPageModel {
 }
 
 type tagPathsPageDelegateKeyMap struct {
+	sel  key.Binding
 	back key.Binding
 }
 
 func newTagPathsPageDelegateKeyMap() tagPathsPageDelegateKeyMap {
 	return tagPathsPageDelegateKeyMap{
+		sel: key.NewBinding(
+			key.WithKeys("enter"),
+			key.WithHelp("enter", "select"),
+		),
 		back: key.NewBinding(
 			key.WithKeys("backspace", "ctrl+h"),
 			key.WithHelp("backspace", "back"),
@@ -66,6 +71,9 @@ func (m tagPathsPageModel) Update(msg tea.Msg) (tagPathsPageModel, tea.Cmd) {
 			if m.list.FilterState() != list.Filtering {
 				return m, goBack
 			}
+		case key.Matches(msg, m.delegateKeys.sel):
+			path := m.list.SelectedItem().(tagPathsPageListItem).path
+			return m, selectOperation(path.OperationId)
 		}
 	case selectTagMsg:
 		m.updateList(msg.tag)

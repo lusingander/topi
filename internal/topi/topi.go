@@ -55,6 +55,17 @@ func sortTags(tags []*Tag) {
 	sort.Slice(tags, func(i, j int) bool { return tags[i].Name < tags[j].Name })
 }
 
+func (d *Document) FindPathByOperationId(operationId string) *Path {
+	for _, paths := range d.TagPathMap {
+		for _, path := range paths {
+			if path.OperationId == operationId {
+				return path
+			}
+		}
+	}
+	return nil
+}
+
 type Info struct {
 	OpenAPIVersion string
 	Title          string

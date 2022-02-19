@@ -34,6 +34,14 @@ func selectTag(tag string) tea.Cmd {
 	return func() tea.Msg { return selectTagMsg{tag} }
 }
 
+type selectOperationMsg struct {
+	operationId string
+}
+
+func selectOperation(operationId string) tea.Cmd {
+	return func() tea.Msg { return selectOperationMsg{operationId} }
+}
+
 type goBackMsg struct{}
 
 func goBack() tea.Msg {
