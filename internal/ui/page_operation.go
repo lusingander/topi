@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -11,8 +13,30 @@ import (
 )
 
 var (
-	operationPageSummaryStyle = lipgloss.NewStyle().
-					Foreground(lipgloss.Color("70"))
+	operationPageMethodStyle = lipgloss.NewStyle().
+					Bold(true)
+
+	operationPageMethodGetStyle = operationPageMethodStyle.Copy().
+					Foreground(httpMethodGetColor)
+
+	operationPageMethodPostStyle = operationPageMethodStyle.Copy().
+					Foreground(httpMethodPostColor)
+
+	operationPageMethodPutStyle = operationPageMethodStyle.Copy().
+					Foreground(httpMethodPutColor)
+
+	operationPageMethodPatchStyle = operationPageMethodStyle.Copy().
+					Foreground(httpMethodPatchColor)
+
+	operationPageMethodDeleteStyle = operationPageMethodStyle.Copy().
+					Foreground(httpMethodDeleteColor)
+
+	operationPageMethodDeprecatedStyle = operationPageMethodStyle.Copy().
+						Foreground(httpMethodDeprecatedColor)
+
+	operationPageDeprecatedMarkerStyle = lipgloss.NewStyle().
+						Foreground(lipgloss.Color("208")).
+						Bold(true)
 
 	operationPageItemStyle = lipgloss.NewStyle().
 				Padding(1, 2)
@@ -60,16 +84,46 @@ func (m *operationPageModel) updateOperation(operationId string) {
 }
 
 func (m *operationPageModel) updateContent() {
-	if m.operation == nil {
+	op := m.operation
+	if op == nil {
 		return
 	}
 
 	var content strings.Builder
 
-	summary := operationPageSummaryStyle.Render(m.operation.Summary)
+	method := m.styledMethod()
+	path := op.UriPath
+	mp := fmt.Sprintf("%s %s", method, path)
+	if op.Deprecated {
+		mp += operationPageDeprecatedMarkerStyle.Render(" Deprecated")
+	}
+	content.WriteString(operationPageItemStyle.Render(mp))
+
+	summary := op.Summary
 	content.WriteString(operationPageItemStyle.Render(summary))
 
 	m.viewport.SetContent(content.String())
+}
+
+func (m operationPageModel) styledMethod() string {
+	method := m.operation.Method
+	if m.operation.Deprecated {
+		return operationPageMethodDeprecatedStyle.Render(method)
+	}
+	switch method {
+	case http.MethodGet:
+		return operationPageMethodGetStyle.Render(method)
+	case http.MethodPost:
+		return operationPageMethodPostStyle.Render(method)
+	case http.MethodPut:
+		return operationPageMethodPutStyle.Render(method)
+	case http.MethodPatch:
+		return operationPageMethodPatchStyle.Render(method)
+	case http.MethodDelete:
+		return operationPageMethodDeleteStyle.Render(method)
+	default:
+		return operationPageMethodStyle.Render(method)
+	}
 }
 
 func (m operationPageModel) Init() tea.Cmd {
