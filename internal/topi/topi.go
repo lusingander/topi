@@ -82,11 +82,16 @@ type Info struct {
 }
 
 type Path struct {
-	UriPath     string
-	Method      string
-	OperationId string
-	Summary     string
-	Deprecated  bool
+	UriPath          string
+	Method           string
+	OperationId      string
+	Summary          string
+	Description      string
+	Deprecated       bool
+	PathParameters   []*Parameter
+	QueryParameters  []*Parameter
+	HeaderParameters []*Parameter
+	CookieParameters []*Parameter
 }
 
 func comparePath(p1, p2 *Path) bool {
@@ -130,6 +135,20 @@ var httpMethod = map[string]int{
 	http.MethodConnect: 6,
 	http.MethodOptions: 7,
 	http.MethodTrace:   8,
+}
+
+type Parameter struct {
+	Name        string
+	In          string
+	Description string
+	Required    bool
+	Deprecated  bool
+	Schema      *Schema
+}
+
+type Schema struct {
+	Type   string
+	Format string
 }
 
 type Tag struct {

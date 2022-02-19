@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/lusingander/topi/internal/topi"
 )
@@ -36,7 +37,24 @@ var (
 
 	operationPageDeprecatedMarkerStyle = lipgloss.NewStyle().
 						Foreground(lipgloss.Color("208")).
-						Bold(true)
+						Bold(true).
+						Margin(0, 0, 0, 2)
+
+	operationPageSectionHeaderStyle = lipgloss.NewStyle().
+					Foreground(lipgloss.Color("70")).
+					Underline(true)
+
+	operationPageSectionSubHeaderStyle = operationPageSectionHeaderStyle.Copy().
+						Margin(0, 0, 0, 1)
+
+	operationPageParameterItemsStyle = operationPageItemStyle.Copy().
+						Margin(0, 0, 0, 2)
+
+	operationPageParameterRequiredMarkerColorStyle = lipgloss.NewStyle().
+							Foreground(lipgloss.Color("168"))
+
+	operationPageParameterTypeColorStyle = lipgloss.NewStyle().
+						Foreground(lipgloss.Color("246"))
 
 	operationPageItemStyle = lipgloss.NewStyle().
 				Padding(1, 2)
@@ -89,20 +107,85 @@ func (m *operationPageModel) updateContent() {
 		return
 	}
 
+	glamourWidth := m.width - 10
+	r, _ := glamour.NewTermRenderer(
+		glamour.WithStandardStyle(glamourTheme),
+		glamour.WithWordWrap(glamourWidth),
+	)
+
 	var content strings.Builder
 
 	method := m.styledMethod()
 	path := op.UriPath
 	mp := fmt.Sprintf("%s %s", method, path)
 	if op.Deprecated {
-		mp += operationPageDeprecatedMarkerStyle.Render(" Deprecated")
+		mp += operationPageDeprecatedMarkerStyle.Render("Deprecated")
 	}
 	content.WriteString(operationPageItemStyle.Render(mp))
 
-	summary := op.Summary
-	content.WriteString(operationPageItemStyle.Render(summary))
+	if op.Summary != "" {
+		summary := op.Summary
+		content.WriteString(operationPageItemStyle.Render(summary))
+	}
+
+	if op.Description != "" {
+		desc, _ := r.Render(op.Description)
+		desc = operationPageItemStyle.Render(desc)
+		content.WriteString(desc)
+	}
+
+	requestSectionHeader := operationPageSectionHeaderStyle.Render("Request")
+	content.WriteString(operationPageItemStyle.Render(requestSectionHeader))
+
+	if len(op.PathParameters) > 0 {
+		pathParamSectionHeader := operationPageSectionSubHeaderStyle.Render("Path parameters")
+		content.WriteString(operationPageItemStyle.Render(pathParamSectionHeader))
+		content.WriteString(operationPageParameterItemsStyle.Render(m.styledParams(op.PathParameters)))
+	}
+
+	if len(op.QueryParameters) > 0 {
+		queryParamSectionHeader := operationPageSectionSubHeaderStyle.Render("Query parameters")
+		content.WriteString(operationPageItemStyle.Render(queryParamSectionHeader))
+		content.WriteString(operationPageParameterItemsStyle.Render(m.styledParams(op.QueryParameters)))
+	}
+
+	if len(op.HeaderParameters) > 0 {
+		headerParamSectionHeader := operationPageSectionSubHeaderStyle.Render("Header parameters")
+		content.WriteString(operationPageItemStyle.Render(headerParamSectionHeader))
+		content.WriteString(operationPageParameterItemsStyle.Render(m.styledParams(op.HeaderParameters)))
+	}
+
+	if len(op.CookieParameters) > 0 {
+		cookieParamSectionHeader := operationPageSectionSubHeaderStyle.Render("Cookie parameters")
+		content.WriteString(operationPageItemStyle.Render(cookieParamSectionHeader))
+		content.WriteString(operationPageParameterItemsStyle.Render(m.styledParams(op.CookieParameters)))
+	}
+
+	responseSectionHeader := operationPageSectionHeaderStyle.Render("Response")
+	content.WriteString(operationPageItemStyle.Render(responseSectionHeader))
 
 	m.viewport.SetContent(content.String())
+}
+
+func (operationPageModel) styledParams(params []*topi.Parameter) string {
+	strs := make([]string, len(params))
+	for i, param := range params {
+		p := param.Name
+		if param.Required {
+			p += operationPageParameterRequiredMarkerColorStyle.Render("*")
+		}
+		if param.Schema != nil {
+			p += "  "
+			if param.Schema.Type != "" {
+				p += operationPageParameterTypeColorStyle.Render(param.Schema.Type)
+			}
+			if param.Schema.Format != "" {
+				p += operationPageParameterTypeColorStyle.Render(fmt.Sprintf("(%s)", param.Schema.Type))
+			}
+		}
+		strs[i] = p
+	}
+	return strings.Join(strs, "\n")
 }
 
 func (m operationPageModel) styledMethod() string {

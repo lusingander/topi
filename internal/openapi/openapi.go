@@ -102,11 +102,16 @@ func getTag(op *openapi3.Operation) string {
 
 func convertOperation(op *openapi3.Operation, method, uriPath string) *topi.Path {
 	ret := &topi.Path{
-		UriPath:     uriPath,
-		Method:      method,
-		OperationId: op.OperationID,
-		Summary:     op.Summary,
-		Deprecated:  op.Deprecated,
+		UriPath:          uriPath,
+		Method:           method,
+		OperationId:      op.OperationID,
+		Summary:          op.Summary,
+		Description:      op.Description,
+		Deprecated:       op.Deprecated,
+		PathParameters:   convertParameters(op.Parameters, "path"),
+		QueryParameters:  convertParameters(op.Parameters, "query"),
+		HeaderParameters: convertParameters(op.Parameters, "header"),
+		CookieParameters: convertParameters(op.Parameters, "cookie"),
 	}
 	return ret
 }
@@ -128,6 +133,34 @@ func mergeMap(m1, m2 map[string][]*topi.Path) map[string][]*topi.Path {
 		}
 	}
 	return ret
+}
+
+func convertParameters(params openapi3.Parameters, in string) []*topi.Parameter {
+	ret := make([]*topi.Parameter, 0)
+	for _, param := range params {
+		if param.Value.In == in {
+			p := &topi.Parameter{
+				Name:        param.Value.Name,
+				In:          param.Value.In,
+				Description: param.Value.Description,
+				Required:    param.Value.Required,
+				Deprecated:  param.Value.Deprecated,
+				Schema:      convertSchema(param.Value.Schema),
+			}
+			ret = append(ret, p)
+		}
+	}
+	return ret
+}
+
+func convertSchema(schema *openapi3.SchemaRef) *topi.Schema {
+	if schema == nil || schema.Value == nil {
+		return nil
+	}
+	return &topi.Schema{
+		Type:   schema.Value.Type,
+		Format: schema.Value.Format,
+	}
 }
 
 func convertTags(tags openapi3.Tags) []*topi.Tag {
