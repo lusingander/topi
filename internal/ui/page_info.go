@@ -7,7 +7,6 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/lusingander/topi/internal/topi"
 )
@@ -108,11 +107,7 @@ func (m *infoPageModel) reset() {
 
 func (m *infoPageModel) updateContent() {
 	info := m.doc.Info
-	glamourWidth := m.width - 10
-	r, _ := glamour.NewTermRenderer(
-		glamour.WithStandardStyle(glamourTheme),
-		glamour.WithWordWrap(glamourWidth),
-	)
+	r, _ := markdownRenderer(m.width - 10)
 
 	var content strings.Builder
 

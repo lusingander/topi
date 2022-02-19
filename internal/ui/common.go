@@ -2,10 +2,6 @@ package ui
 
 import "github.com/charmbracelet/lipgloss"
 
-const (
-	glamourTheme = "notty" // todo: fix
-)
-
 var (
 	baseStyle = lipgloss.NewStyle().Margin(1, 2)
 
