@@ -43,3 +43,20 @@ var (
 	listSelectedDescStyle = listSelectedItemStyle.Copy().
 				Foreground(selectedColor)
 )
+
+var (
+	httpMethodGetColor    = lipgloss.Color("33")
+	httpMethodPostColor   = lipgloss.Color("35")
+	httpMethodPutColor    = lipgloss.Color("148")
+	httpMethodPatchColor  = lipgloss.Color("218")
+	httpMethodDeleteColor = lipgloss.Color("172")
+
+	httpMethodSelectedGetColor    = lipgloss.Color("31")
+	httpMethodSelectedPostColor   = lipgloss.Color("29")
+	httpMethodSelectedPutColor    = lipgloss.Color("112")
+	httpMethodSelectedPatchColor  = lipgloss.Color("181")
+	httpMethodSelectedDeleteColor = lipgloss.Color("136")
+
+	httpMethodDeprecatedColor         = lipgloss.Color("246")
+	httpMethodSelectedDeprecatedColor = lipgloss.Color("243")
+)

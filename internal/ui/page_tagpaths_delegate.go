@@ -18,43 +18,43 @@ var (
 				Bold(true)
 
 	tagPathsPageMethodSelectedGetStyle = tagPathsPageMethodStyle.Copy().
-						Foreground(lipgloss.Color("31"))
+						Foreground(httpMethodSelectedGetColor)
 
 	tagPathsPageMethodNormalGetStyle = tagPathsPageMethodStyle.Copy().
-						Foreground(lipgloss.Color("33"))
+						Foreground(httpMethodGetColor)
 
 	tagPathsPageMethodSelectedPostStyle = tagPathsPageMethodStyle.Copy().
-						Foreground(lipgloss.Color("29"))
+						Foreground(httpMethodSelectedPostColor)
 
 	tagPathsPageMethodNormalPostStyle = tagPathsPageMethodStyle.Copy().
-						Foreground(lipgloss.Color("35"))
+						Foreground(httpMethodPostColor)
 
 	tagPathsPageMethodSelectedDeleteStyle = tagPathsPageMethodStyle.Copy().
-						Foreground(lipgloss.Color("136"))
+						Foreground(httpMethodSelectedDeleteColor)
 
 	tagPathsPageMethodNormalDeleteStyle = tagPathsPageMethodStyle.Copy().
-						Foreground(lipgloss.Color("172"))
+						Foreground(httpMethodDeleteColor)
 
 	tagPathsPageMethodSelectedPutStyle = tagPathsPageMethodStyle.Copy().
-						Foreground(lipgloss.Color("112"))
+						Foreground(httpMethodSelectedPutColor)
 
 	tagPathsPageMethodNormalPutStyle = tagPathsPageMethodStyle.Copy().
-						Foreground(lipgloss.Color("148"))
+						Foreground(httpMethodPutColor)
 
 	tagPathsPageMethodSelectedPatchStyle = tagPathsPageMethodStyle.Copy().
-						Foreground(lipgloss.Color("181"))
+						Foreground(httpMethodSelectedPatchColor)
 
 	tagPathsPageMethodNormalPatchStyle = tagPathsPageMethodStyle.Copy().
-						Foreground(lipgloss.Color("218"))
+						Foreground(httpMethodPatchColor)
 
 	tagPathsPageMethodDeprecatedStyle = tagPathsPageMethodStyle.Copy().
 						Strikethrough(true)
 
 	tagPathsPageMethodSelectedDeprecatedStyle = tagPathsPageMethodDeprecatedStyle.Copy().
-							Foreground(lipgloss.Color("243"))
+							Foreground(httpMethodSelectedDeprecatedColor)
 
 	tagPathsPageMethodNormalDeprecatedStyle = tagPathsPageMethodDeprecatedStyle.Copy().
-						Foreground(lipgloss.Color("246"))
+						Foreground(httpMethodDeprecatedColor)
 
 	tagPathsPagePathDeprecatedStyle = lipgloss.NewStyle().
 					Strikethrough(true)
