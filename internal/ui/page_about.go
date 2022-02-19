@@ -51,7 +51,6 @@ func newAboutPageModel() aboutPageModel {
 	m := aboutPageModel{}
 	m.delegateKeys = newAboutPageDelegateKeyMap()
 	m.viewport = viewport.New(0, 0)
-	m.selected = aboutPageSelectableNotSelected
 	return m
 }
 
@@ -87,6 +86,10 @@ func (m *aboutPageModel) SetSize(w, h int) {
 	m.width, m.height = w, h
 	m.viewport.Width, m.viewport.Height = w, h
 	m.updateContent()
+}
+
+func (m *aboutPageModel) reset() {
+	m.selected = aboutPageSelectableNotSelected
 }
 
 func (m *aboutPageModel) updateContent() {
@@ -157,6 +160,7 @@ func (m aboutPageModel) Update(msg tea.Msg) (aboutPageModel, tea.Cmd) {
 			return m, nil
 		}
 	case selectAboutMenuMsg:
+		m.reset()
 		m.updateContent()
 		return m, nil
 	}

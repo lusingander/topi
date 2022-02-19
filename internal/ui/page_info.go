@@ -63,7 +63,6 @@ func newInfoPageModel(doc *topi.Document) infoPageModel {
 	}
 	m.delegateKeys = newInfoPageDelegateKeyMap()
 	m.viewport = viewport.New(0, 0)
-	m.selected = infoPageSelectableNotSelected
 	return m
 }
 
@@ -99,6 +98,10 @@ func (m *infoPageModel) SetSize(w, h int) {
 	m.width, m.height = w, h
 	m.viewport.Width, m.viewport.Height = w, h
 	m.updateContent()
+}
+
+func (m *infoPageModel) reset() {
+	m.selected = infoPageSelectableNotSelected
 }
 
 func (m *infoPageModel) updateContent() {
@@ -236,6 +239,7 @@ func (m infoPageModel) Update(msg tea.Msg) (infoPageModel, tea.Cmd) {
 			return m, nil
 		}
 	case selectInfoMenuMsg:
+		m.reset()
 		m.updateContent()
 		return m, nil
 	}
