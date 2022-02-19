@@ -102,6 +102,7 @@ func (m *infoPageModel) SetSize(w, h int) {
 
 func (m *infoPageModel) reset() {
 	m.selected = infoPageSelectableNotSelected
+	m.viewport.GotoTop()
 }
 
 func (m *infoPageModel) updateContent() {

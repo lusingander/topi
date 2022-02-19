@@ -90,6 +90,7 @@ func (m *aboutPageModel) SetSize(w, h int) {
 
 func (m *aboutPageModel) reset() {
 	m.selected = aboutPageSelectableNotSelected
+	m.viewport.GotoTop()
 }
 
 func (m *aboutPageModel) updateContent() {
