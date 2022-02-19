@@ -67,16 +67,18 @@ func (d *Document) FindPathByOperationId(operationId string) *Path {
 }
 
 type Info struct {
-	OpenAPIVersion string
-	Title          string
-	Description    string
-	TermsOfService string
-	ContactName    string
-	ContactUrl     string
-	ContactEmail   string
-	LicenseName    string
-	LicenseUrl     string
-	Version        string
+	OpenAPIVersion    string
+	Title             string
+	Description       string
+	TermsOfService    string
+	ContactName       string
+	ContactUrl        string
+	ContactEmail      string
+	LicenseName       string
+	LicenseUrl        string
+	Version           string
+	ExDocsDescription string
+	ExDocsUrl         string
 }
 
 type Path struct {

@@ -45,6 +45,7 @@ const (
 	infoPageSelectableTermsOfService
 	infoPageSelectableContractUrl
 	infoPageSelectableLicenseUrl
+	infoPageSelectableExDocsUrl
 	infoPageSelectableNumberOfItems // not item
 )
 
@@ -172,9 +173,30 @@ func (m *infoPageModel) updateContent() {
 		content.WriteString(infoPageItemStyle.Render(buf.String()))
 	}
 
-	desc, _ := r.Render(info.Description)
-	desc = infoPageDescriptionStyle.Render(desc)
-	content.WriteString(desc)
+	if info.Description != "" {
+		desc, _ := r.Render(info.Description)
+		desc = infoPageDescriptionStyle.Render(desc)
+		content.WriteString(desc)
+	}
+
+	if info.ExDocsDescription != "" {
+		desc, _ := r.Render(info.ExDocsDescription)
+		desc = infoPageDescriptionStyle.Render(desc)
+		content.WriteString(desc)
+	}
+
+	if info.ExDocsUrl != "" {
+		url := info.ExDocsUrl
+		if m.selected == infoPageSelectableExDocsUrl {
+			url = infoPageSelectedUrlStyle.Render(url)
+		} else {
+			url = infoPageUrlStyle.Render(url)
+		}
+		content.WriteString(infoPageItemStyle.Render(url))
+	}
+
+	openAPIVersion := infoPageVersionStyle.Render(fmt.Sprintf("OpenAPI Version: %s", info.OpenAPIVersion))
+	content.WriteString(infoPageItemStyle.Render(openAPIVersion))
 
 	m.viewport.SetContent(content.String())
 }
@@ -199,6 +221,10 @@ func (m *infoPageModel) selectItem(reverse bool) {
 		if m.doc.Info.LicenseUrl == "" {
 			m.selectItem(reverse)
 		}
+	case infoPageSelectableExDocsUrl:
+		if m.doc.Info.ExDocsUrl == "" {
+			m.selectItem(reverse)
+		}
 	default:
 		m.selected = infoPageSelectableNotSelected
 	}
@@ -212,6 +238,8 @@ func (m infoPageModel) openInBrowser() error {
 		return openInBrowser(m.doc.Info.ContactUrl)
 	case infoPageSelectableLicenseUrl:
 		return openInBrowser(m.doc.Info.LicenseUrl)
+	case infoPageSelectableExDocsUrl:
+		return openInBrowser(m.doc.Info.ExDocsUrl)
 	default:
 		return nil // do nothing
 	}

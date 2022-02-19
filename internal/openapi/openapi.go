@@ -21,26 +21,29 @@ func Load(filepath string) (*topi.Document, error) {
 }
 
 func convert(t *openapi3.T) *topi.Document {
-	info := convertInfo(t.OpenAPI, t.Info)
+	info := convertInfo(t.OpenAPI, t.Info, t.ExternalDocs)
 	paths := convertPaths(t.Paths)
 	tags := convertTags(t.Tags)
 	return topi.NewDocument(info, paths, tags)
 }
 
-func convertInfo(openapi string, info *openapi3.Info) *topi.Info {
+func convertInfo(openapi string, info *openapi3.Info, exDocs *openapi3.ExternalDocs) *topi.Info {
 	contactName, contactUrl, contactEmail := convertInfoContact(info.Contact)
 	licenseName, licenseUrl := convertInfoLicense(info.License)
+	exDocsDesc, exDocsUrl := convertExternalDocs(exDocs)
 	return &topi.Info{
-		OpenAPIVersion: openapi,
-		Title:          info.Title,
-		Description:    info.Description,
-		TermsOfService: info.TermsOfService,
-		ContactName:    contactName,
-		ContactUrl:     contactUrl,
-		ContactEmail:   contactEmail,
-		LicenseName:    licenseName,
-		LicenseUrl:     licenseUrl,
-		Version:        info.Version,
+		OpenAPIVersion:    openapi,
+		Title:             info.Title,
+		Description:       info.Description,
+		TermsOfService:    info.TermsOfService,
+		ContactName:       contactName,
+		ContactUrl:        contactUrl,
+		ContactEmail:      contactEmail,
+		LicenseName:       licenseName,
+		LicenseUrl:        licenseUrl,
+		Version:           info.Version,
+		ExDocsDescription: exDocsDesc,
+		ExDocsUrl:         exDocsUrl,
 	}
 }
 
@@ -58,6 +61,15 @@ func convertInfoLicense(l *openapi3.License) (name, url string) {
 		name, url = "", ""
 	} else {
 		name, url = l.Name, l.URL
+	}
+	return
+}
+
+func convertExternalDocs(d *openapi3.ExternalDocs) (desc, url string) {
+	if d == nil {
+		desc, url = "", ""
+	} else {
+		desc, url = d.Description, d.URL
 	}
 	return
 }
