@@ -34,8 +34,8 @@ func newHelpPageModel() helpPageModel {
 }
 
 type helpPageDelegateKeyMap struct {
-	back key.Binding
-	sel  key.Binding
+	back  key.Binding
+	enter key.Binding
 }
 
 func newHelpPageDelegateKeyMap() helpPageDelegateKeyMap {
@@ -44,7 +44,7 @@ func newHelpPageDelegateKeyMap() helpPageDelegateKeyMap {
 			key.WithKeys("backspace", "ctrl+h"),
 			key.WithHelp("backspace", "back"),
 		),
-		sel: key.NewBinding(
+		enter: key.NewBinding(
 			key.WithKeys("enter"),
 			key.WithHelp("enter", "select"),
 		),
@@ -64,7 +64,7 @@ func (m helpPageModel) Update(msg tea.Msg) (helpPageModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, m.delegateKeys.sel):
+		case key.Matches(msg, m.delegateKeys.enter):
 			menu := m.list.SelectedItem().(helpPageListItem)
 			switch menu.title {
 			case helpPageAboutMenu:

@@ -44,12 +44,12 @@ func newMenuPageModel() menuPageModel {
 }
 
 type menuPageDelegateKeyMap struct {
-	sel key.Binding
+	enter key.Binding
 }
 
 func newMenuPageDelegateKeyMap() menuPageDelegateKeyMap {
 	return menuPageDelegateKeyMap{
-		sel: key.NewBinding(
+		enter: key.NewBinding(
 			key.WithKeys("enter"),
 			key.WithHelp("enter", "select"),
 		),
@@ -69,7 +69,7 @@ func (m menuPageModel) Update(msg tea.Msg) (menuPageModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, m.delegateKeys.sel):
+		case key.Matches(msg, m.delegateKeys.enter):
 			menu := m.list.SelectedItem().(menuPageListItem)
 			switch menu.title {
 			case menuPageInfoMenu:
