@@ -12,7 +12,9 @@ topi is the documentation viewer for OpenAPI v3 definitions in the terminal.
 
 ## Usage
 
-`$ topi <spec path>`
+`$ topi <path>`
+
+> `path` can be local file path or remote URL.
 
 ## License
 

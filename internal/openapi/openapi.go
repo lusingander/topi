@@ -2,18 +2,31 @@ package openapi
 
 import (
 	"context"
+	"net/url"
+	"path/filepath"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/lusingander/topi/internal/topi"
 )
 
-func Load(filepath string) (*topi.Document, error) {
+func Load(path string) (*topi.Document, error) {
 	ctx := context.Background()
 	loader := openapi3.Loader{
 		Context:               ctx,
 		IsExternalRefsAllowed: true,
 	}
-	doc, err := loader.LoadFromFile(filepath)
+
+	if uri, err := url.ParseRequestURI(path); err == nil {
+		if doc, err := loader.LoadFromURI(uri); err == nil {
+			return convert(doc), nil
+		}
+	}
+
+	fp, err := filepath.Abs(path)
+	if err != nil {
+		return nil, err
+	}
+	doc, err := loader.LoadFromFile(fp)
 	if err != nil {
 		return nil, err
 	}
