@@ -45,7 +45,7 @@ const (
 	infoPageSelectableTermsOfService
 	infoPageSelectableContractUrl
 	infoPageSelectableLicenseUrl
-	numberOfItems // not item
+	infoPageSelectableNumberOfItems // not item
 )
 
 type infoPageModel struct {
@@ -176,10 +176,11 @@ func (m *infoPageModel) updateContent() {
 }
 
 func (m *infoPageModel) selectItem(reverse bool) {
+	n := infoPageSelectableNumberOfItems
 	if reverse {
-		m.selected = ((m.selected-1)%numberOfItems + numberOfItems) % numberOfItems
+		m.selected = ((m.selected-1)%n + n) % n
 	} else {
-		m.selected = (m.selected + 1) % numberOfItems
+		m.selected = (m.selected + 1) % n
 	}
 	switch m.selected {
 	case infoPageSelectableTermsOfService:
