@@ -19,6 +19,8 @@ type tagApiPage struct {
 
 type helpPage struct{}
 
+type aboutPage struct{}
+
 type pageStack struct {
 	stack []page
 }
@@ -57,6 +59,7 @@ type model struct {
 	tagPage    tagPageModel
 	tagApiPage tagApiPageModel
 	helpPage   helpPageModel
+	aboutPage  aboutPageModel
 }
 
 var _ tea.Model = (*model)(nil)
@@ -71,6 +74,7 @@ func newModel(doc *topi.Document) model {
 		tagPage:    newTagPageModel(doc),
 		tagApiPage: newTagApiPageModel(doc),
 		helpPage:   newHelpPageModel(),
+		aboutPage:  newAboutPageModel(),
 	}
 }
 
@@ -80,6 +84,7 @@ func (m *model) SetSize(w, h int) {
 	m.tagPage.SetSize(w, h)
 	m.tagApiPage.SetSize(w, h)
 	m.helpPage.SetSize(w, h)
+	m.aboutPage.SetSize(w, h)
 }
 
 func (m model) Init() tea.Cmd {
@@ -103,6 +108,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.pushPage(tagPage{})
 	case selectHelpMenuMsg:
 		m.pushPage(helpPage{})
+	case selectAboutMenuMsg:
+		m.pushPage(aboutPage{})
 	case selectTagMsg:
 		m.pushPage(tagApiPage(msg))
 	case goBackMsg:
@@ -123,6 +130,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	case helpPage:
 		m.helpPage, cmd = m.helpPage.Update(msg)
+		return m, cmd
+	case aboutPage:
+		m.aboutPage, cmd = m.aboutPage.Update(msg)
 		return m, cmd
 	default:
 		return m, nil
@@ -145,6 +155,8 @@ func (m model) content() string {
 		return m.tagApiPage.View()
 	case helpPage:
 		return m.helpPage.View()
+	case aboutPage:
+		return m.aboutPage.View()
 	default:
 		return "error... :("
 	}

@@ -20,6 +20,12 @@ func selectHelpMenu() tea.Msg {
 	return selectHelpMenuMsg{}
 }
 
+type selectAboutMenuMsg struct{}
+
+func selectAboutMenu() tea.Msg {
+	return selectAboutMenuMsg{}
+}
+
 type selectTagMsg struct {
 	tag string
 }

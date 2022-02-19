@@ -68,7 +68,7 @@ func (m helpPageModel) Update(msg tea.Msg) (helpPageModel, tea.Cmd) {
 			menu := m.list.SelectedItem().(helpPageListItem)
 			switch menu.title {
 			case helpPageAboutMenu:
-				return m, nil // todo
+				return m, selectAboutMenu
 			}
 			return m, nil
 		case key.Matches(msg, m.delegateKeys.back):
