@@ -13,7 +13,7 @@ type infoPage struct{}
 
 type tagPage struct{}
 
-type tagApiPage struct {
+type tagPathsPage struct {
 	tag string
 }
 
@@ -54,12 +54,12 @@ type model struct {
 
 	*pageStack
 
-	menuPage   menuPageModel
-	infoPage   infoPageModel
-	tagPage    tagPageModel
-	tagApiPage tagApiPageModel
-	helpPage   helpPageModel
-	aboutPage  aboutPageModel
+	menuPage     menuPageModel
+	infoPage     infoPageModel
+	tagPage      tagPageModel
+	tagPathsPage tagPathsPageModel
+	helpPage     helpPageModel
+	aboutPage    aboutPageModel
 }
 
 var _ tea.Model = (*model)(nil)
@@ -67,14 +67,14 @@ var _ tea.Model = (*model)(nil)
 func newModel(doc *topi.Document) model {
 	startPage := menuPage{}
 	return model{
-		doc:        doc,
-		pageStack:  newPageStack(startPage),
-		infoPage:   newInfoPageModel(doc),
-		menuPage:   newMenuPageModel(),
-		tagPage:    newTagPageModel(doc),
-		tagApiPage: newTagApiPageModel(doc),
-		helpPage:   newHelpPageModel(),
-		aboutPage:  newAboutPageModel(),
+		doc:          doc,
+		pageStack:    newPageStack(startPage),
+		infoPage:     newInfoPageModel(doc),
+		menuPage:     newMenuPageModel(),
+		tagPage:      newTagPageModel(doc),
+		tagPathsPage: newTagPathsPageModel(doc),
+		helpPage:     newHelpPageModel(),
+		aboutPage:    newAboutPageModel(),
 	}
 }
 
@@ -82,7 +82,7 @@ func (m *model) SetSize(w, h int) {
 	m.menuPage.SetSize(w, h)
 	m.infoPage.SetSize(w, h)
 	m.tagPage.SetSize(w, h)
-	m.tagApiPage.SetSize(w, h)
+	m.tagPathsPage.SetSize(w, h)
 	m.helpPage.SetSize(w, h)
 	m.aboutPage.SetSize(w, h)
 }
@@ -111,7 +111,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case selectAboutMenuMsg:
 		m.pushPage(aboutPage{})
 	case selectTagMsg:
-		m.pushPage(tagApiPage(msg))
+		m.pushPage(tagPathsPage(msg))
 	case goBackMsg:
 		m.popPage()
 	}
@@ -125,8 +125,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tagPage:
 		m.tagPage, cmd = m.tagPage.Update(msg)
 		return m, cmd
-	case tagApiPage:
-		m.tagApiPage, cmd = m.tagApiPage.Update(msg)
+	case tagPathsPage:
+		m.tagPathsPage, cmd = m.tagPathsPage.Update(msg)
 		return m, cmd
 	case helpPage:
 		m.helpPage, cmd = m.helpPage.Update(msg)
@@ -151,8 +151,8 @@ func (m model) content() string {
 		return m.infoPage.View()
 	case tagPage:
 		return m.tagPage.View()
-	case tagApiPage:
-		return m.tagApiPage.View()
+	case tagPathsPage:
+		return m.tagPathsPage.View()
 	case helpPage:
 		return m.helpPage.View()
 	case aboutPage:

@@ -7,30 +7,30 @@ import (
 	"github.com/lusingander/topi/internal/topi"
 )
 
-type tagApiPageModel struct {
+type tagPathsPageModel struct {
 	doc           *topi.Document
 	list          list.Model
-	delegateKeys  tagApiPageDelegateKeyMap
+	delegateKeys  tagPathsPageDelegateKeyMap
 	width, height int
 }
 
-func newTagApiPageModel(doc *topi.Document) tagApiPageModel {
-	m := tagApiPageModel{
+func newTagPathsPageModel(doc *topi.Document) tagPathsPageModel {
+	m := tagPathsPageModel{
 		doc: doc,
 	}
-	m.delegateKeys = newTagApiPageDelegateKeyMap()
-	delegate := newTagApiPageListDelegate()
+	m.delegateKeys = newTagPathsPageDelegateKeyMap()
+	delegate := newTagPathsPageListDelegate()
 	m.list = list.New(nil, delegate, 0, 0)
 	m.list.Title = topi.AppName
 	return m
 }
 
-type tagApiPageDelegateKeyMap struct {
+type tagPathsPageDelegateKeyMap struct {
 	back key.Binding
 }
 
-func newTagApiPageDelegateKeyMap() tagApiPageDelegateKeyMap {
-	return tagApiPageDelegateKeyMap{
+func newTagPathsPageDelegateKeyMap() tagPathsPageDelegateKeyMap {
+	return tagPathsPageDelegateKeyMap{
 		back: key.NewBinding(
 			key.WithKeys("backspace", "ctrl+h"),
 			key.WithHelp("backspace", "back"),
@@ -38,27 +38,27 @@ func newTagApiPageDelegateKeyMap() tagApiPageDelegateKeyMap {
 	}
 }
 
-func (m *tagApiPageModel) SetSize(w, h int) {
+func (m *tagPathsPageModel) SetSize(w, h int) {
 	m.width, m.height = w, h
 	m.list.SetSize(w, h)
 }
 
-func (m *tagApiPageModel) updateList(tag string) {
+func (m *tagPathsPageModel) updateList(tag string) {
 	m.list.ResetSelected()
 	paths := m.doc.TagPathMap[tag]
 	items := make([]list.Item, len(paths))
 	for i, path := range paths {
-		item := tagApiPageListItem{path}
+		item := tagPathsPageListItem{path}
 		items[i] = item
 	}
 	m.list.SetItems(items)
 }
 
-func (m tagApiPageModel) Init() tea.Cmd {
+func (m tagPathsPageModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m tagApiPageModel) Update(msg tea.Msg) (tagApiPageModel, tea.Cmd) {
+func (m tagPathsPageModel) Update(msg tea.Msg) (tagPathsPageModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
@@ -76,6 +76,6 @@ func (m tagApiPageModel) Update(msg tea.Msg) (tagApiPageModel, tea.Cmd) {
 	return m, cmd
 }
 
-func (m tagApiPageModel) View() string {
+func (m tagPathsPageModel) View() string {
 	return m.list.View()
 }
