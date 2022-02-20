@@ -6,6 +6,10 @@ import (
 	"strings"
 )
 
+const (
+	UntaggedDummyTag = "<<untagged>>"
+)
+
 type Document struct {
 	Info       *Info
 	TagPathMap map[string][]*Path
@@ -52,7 +56,17 @@ func eixstTag(name string, tags []*Tag) bool {
 }
 
 func sortTags(tags []*Tag) {
-	sort.Slice(tags, func(i, j int) bool { return tags[i].Name < tags[j].Name })
+	sort.Slice(tags, func(i, j int) bool { return compareTags(tags[i].Name, tags[j].Name) })
+}
+
+func compareTags(t1, t2 string) bool {
+	if t1 == UntaggedDummyTag {
+		return false
+	}
+	if t2 == UntaggedDummyTag {
+		return true
+	}
+	return t1 < t2
 }
 
 func (d *Document) FindPathByOperationId(operationId string) *Path {

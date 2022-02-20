@@ -110,6 +110,9 @@ func convertPathItem(pathItem *openapi3.PathItem, uriPath string) map[string][]*
 }
 
 func getTag(op *openapi3.Operation) string {
+	if len(op.Tags) == 0 {
+		return topi.UntaggedDummyTag
+	}
 	return op.Tags[0]
 }
 
