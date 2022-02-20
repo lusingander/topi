@@ -164,6 +164,7 @@ type Schema struct {
 	Type    string
 	Format  string
 	Default interface{}
+	Enum    []interface{}
 
 	Min          *float64
 	Max          *float64

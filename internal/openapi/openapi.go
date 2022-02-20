@@ -183,6 +183,7 @@ func convertSchema(schema *openapi3.SchemaRef) *topi.Schema {
 		Type:         sc.Type,
 		Format:       sc.Format,
 		Default:      sc.Default,
+		Enum:         sc.Enum,
 		Min:          sc.Min,
 		Max:          sc.Max,
 		ExclusiveMin: sc.ExclusiveMin,

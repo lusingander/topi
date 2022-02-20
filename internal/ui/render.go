@@ -80,3 +80,11 @@ func schemaConstraintStrings(sc *topi.Schema) []string {
 	}
 	return ret
 }
+
+func sliceString(vs []interface{}) string {
+	ss := make([]string, len(vs))
+	for i, v := range vs {
+		ss[i] = fmt.Sprintf("%v", v)
+	}
+	return fmt.Sprintf("[%s]", strings.Join(ss, ", "))
+}

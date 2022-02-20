@@ -32,3 +32,7 @@ func uintPtr(u uint) *uint {
 func float64Pointer(v float64) *float64 {
 	return &v
 }
+
+func uint64Pointer(v uint64) *uint64 {
+	return &v
+}

@@ -119,6 +119,7 @@ func (m *operationPageModel) reset() {
 }
 
 func (m *operationPageModel) updateOperation(operationId string) {
+	// fixme: operationId is not required field...
 	m.operation = m.doc.FindPathByOperationId(operationId)
 }
 
@@ -238,6 +239,24 @@ func (operationPageModel) styledParams(params []*topi.Parameter) string {
 				var s strings.Builder
 				k := operationPageParameterPropertyKeyStyle.Render("Default:")
 				v := operationPageParameterPropertyValueStyle.Render(fmt.Sprintf("%v", param.Schema.Default))
+				s.WriteString(descIndent)
+				s.WriteString(fmt.Sprintf("%s %s", k, v))
+				strs = append(strs, s.String())
+			}
+
+			if len(param.Schema.Enum) > 0 {
+				var s strings.Builder
+				k := operationPageParameterPropertyKeyStyle.Render("Enum:")
+				v := operationPageParameterPropertyValueStyle.Render(sliceString(param.Schema.Enum))
+				s.WriteString(descIndent)
+				s.WriteString(fmt.Sprintf("%s %s", k, v))
+				strs = append(strs, s.String())
+			}
+
+			if param.Schema.Type == "array" && len(param.Schema.Items.Enum) > 0 {
+				var s strings.Builder
+				k := operationPageParameterPropertyKeyStyle.Render("Items Enum:")
+				v := operationPageParameterPropertyValueStyle.Render(sliceString(param.Schema.Items.Enum))
 				s.WriteString(descIndent)
 				s.WriteString(fmt.Sprintf("%s %s", k, v))
 				strs = append(strs, s.String())
