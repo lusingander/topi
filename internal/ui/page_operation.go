@@ -55,6 +55,10 @@ var (
 	operationPageParameterTypeColorStyle = lipgloss.NewStyle().
 						Foreground(lipgloss.Color("246"))
 
+	operationPageParameterDeprecatedNameStyle = lipgloss.NewStyle().
+							Foreground(lipgloss.Color("246")).
+							Strikethrough(true)
+
 	operationPageItemStyle = lipgloss.NewStyle().
 				Padding(1, 2)
 )
@@ -165,20 +169,34 @@ func (m *operationPageModel) updateContent() {
 func (operationPageModel) styledParams(params []*topi.Parameter) string {
 	strs := make([]string, len(params))
 	for i, param := range params {
-		p := param.Name
-		if param.Required {
-			p += operationPageParameterRequiredMarkerColorStyle.Render("*")
+		var s strings.Builder
+
+		name := param.Name
+		if param.Deprecated {
+			name = operationPageParameterDeprecatedNameStyle.Render(name)
 		}
+		s.WriteString(name)
+
+		if param.Required {
+			s.WriteString(operationPageParameterRequiredMarkerColorStyle.Render("*"))
+		}
+
 		if param.Schema != nil {
-			p += "  "
+			s.WriteString("  ")
 			if param.Schema.Type != "" {
-				p += operationPageParameterTypeColorStyle.Render(param.Schema.Type)
+				s.WriteString(operationPageParameterTypeColorStyle.Render(param.Schema.Type))
 			}
 			if param.Schema.Format != "" {
-				p += operationPageParameterTypeColorStyle.Render(fmt.Sprintf("(%s)", param.Schema.Type))
+				s.WriteString(operationPageParameterTypeColorStyle.Render(fmt.Sprintf("(%s)", param.Schema.Format)))
 			}
 		}
-		strs[i] = p
+
+		if param.Deprecated {
+			s.WriteString(" ")
+			s.WriteString(operationPageDeprecatedMarkerStyle.Render("Deprecated"))
+		}
+
+		strs[i] = s.String()
 	}
 	return strings.Join(strs, "\n")
 }

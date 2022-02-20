@@ -99,7 +99,7 @@ func convertPaths(paths openapi3.Paths) map[string][]*topi.Path {
 func convertPathItem(pathItem *openapi3.PathItem, uriPath string) map[string][]*topi.Path {
 	ret := make(map[string][]*topi.Path)
 	for method, op := range pathItem.Operations() {
-		path := convertOperation(op, method, uriPath)
+		path := convertOperation(pathItem, op, method, uriPath)
 		tag := getTag(op)
 		if _, ok := ret[tag]; !ok {
 			ret[tag] = make([]*topi.Path, 0)
@@ -113,7 +113,12 @@ func getTag(op *openapi3.Operation) string {
 	return op.Tags[0]
 }
 
-func convertOperation(op *openapi3.Operation, method, uriPath string) *topi.Path {
+func convertOperation(pathItem *openapi3.PathItem, op *openapi3.Operation, method, uriPath string) *topi.Path {
+	params := op.Parameters
+	if len(params) == 0 {
+		params = pathItem.Parameters
+	}
+
 	ret := &topi.Path{
 		UriPath:          uriPath,
 		Method:           method,
@@ -121,10 +126,10 @@ func convertOperation(op *openapi3.Operation, method, uriPath string) *topi.Path
 		Summary:          op.Summary,
 		Description:      op.Description,
 		Deprecated:       op.Deprecated,
-		PathParameters:   convertParameters(op.Parameters, "path"),
-		QueryParameters:  convertParameters(op.Parameters, "query"),
-		HeaderParameters: convertParameters(op.Parameters, "header"),
-		CookieParameters: convertParameters(op.Parameters, "cookie"),
+		PathParameters:   convertParameters(params, "path"),
+		QueryParameters:  convertParameters(params, "query"),
+		HeaderParameters: convertParameters(params, "header"),
+		CookieParameters: convertParameters(params, "cookie"),
 	}
 	return ret
 }
