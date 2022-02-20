@@ -10,6 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/lusingander/topi/internal/topi"
+	"github.com/muesli/reflow/padding"
 )
 
 var (
@@ -59,8 +60,21 @@ var (
 							Foreground(lipgloss.Color("246")).
 							Strikethrough(true)
 
+	operationPageParameterPropertyKeyStyle = lipgloss.NewStyle().
+						Foreground(lipgloss.Color("143"))
+
+	operationPageParameterPropertyValueStyle = lipgloss.NewStyle().
+							Foreground(lipgloss.Color("167"))
+
 	operationPageItemStyle = lipgloss.NewStyle().
 				Padding(1, 2)
+)
+
+var (
+	operationPageSeparator = lipgloss.NewStyle().
+		Foreground(lipgloss.Color("240")).
+		Padding(1, 2).
+		Render("----------")
 )
 
 type operationPageModel struct {
@@ -100,6 +114,10 @@ func (m *operationPageModel) SetSize(w, h int) {
 	m.updateContent()
 }
 
+func (m *operationPageModel) reset() {
+	m.viewport.GotoTop()
+}
+
 func (m *operationPageModel) updateOperation(operationId string) {
 	m.operation = m.doc.FindPathByOperationId(operationId)
 }
@@ -126,11 +144,14 @@ func (m *operationPageModel) updateContent() {
 		summary := op.Summary
 		content.WriteString(operationPageItemStyle.Render(summary))
 	}
+	content.WriteString(operationPageSeparator)
 
 	if op.Description != "" {
 		desc, _ := r.Render(op.Description)
 		desc = operationPageItemStyle.Render(desc)
 		content.WriteString(desc)
+
+		content.WriteString(operationPageSeparator)
 	}
 
 	requestSectionHeader := operationPageSectionHeaderStyle.Render("Request")
@@ -167,28 +188,35 @@ func (m *operationPageModel) updateContent() {
 }
 
 func (operationPageModel) styledParams(params []*topi.Parameter) string {
-	strs := make([]string, len(params))
-	for i, param := range params {
+	strs := make([]string, 0)
+
+	nameAreaWidth := 0
+	for _, param := range params {
+		w := len(param.Name)
+		if nameAreaWidth < w {
+			nameAreaWidth = w
+		}
+	}
+	nameAreaWidth += 1 // requred marker
+	schemaIndent := "  "
+	descIndent := strings.Repeat(" ", nameAreaWidth+len(schemaIndent))
+
+	for _, param := range params {
 		var s strings.Builder
 
 		name := param.Name
 		if param.Deprecated {
 			name = operationPageParameterDeprecatedNameStyle.Render(name)
 		}
-		s.WriteString(name)
-
 		if param.Required {
-			s.WriteString(operationPageParameterRequiredMarkerColorStyle.Render("*"))
+			name += operationPageParameterRequiredMarkerColorStyle.Render("*")
 		}
+		s.WriteString(padding.String(name, uint(nameAreaWidth)))
 
 		if param.Schema != nil {
-			s.WriteString("  ")
-			if param.Schema.Type != "" {
-				s.WriteString(operationPageParameterTypeColorStyle.Render(param.Schema.Type))
-			}
-			if param.Schema.Format != "" {
-				s.WriteString(operationPageParameterTypeColorStyle.Render(fmt.Sprintf("(%s)", param.Schema.Format)))
-			}
+			schemaType := schemaTypeString(param.Schema)
+			s.WriteString(schemaIndent)
+			s.WriteString(operationPageParameterTypeColorStyle.Render(schemaType))
 		}
 
 		if param.Deprecated {
@@ -196,7 +224,35 @@ func (operationPageModel) styledParams(params []*topi.Parameter) string {
 			s.WriteString(operationPageDeprecatedMarkerStyle.Render("Deprecated"))
 		}
 
-		strs[i] = s.String()
+		strs = append(strs, s.String())
+
+		if param.Description != "" {
+			var s strings.Builder
+			s.WriteString(descIndent)
+			s.WriteString(param.Description) // fixme: render as md, consider width
+			strs = append(strs, s.String())
+		}
+
+		if param.Schema != nil {
+			if param.Schema.Default != nil {
+				var s strings.Builder
+				k := operationPageParameterPropertyKeyStyle.Render("Default:")
+				v := operationPageParameterPropertyValueStyle.Render(fmt.Sprintf("%v", param.Schema.Default))
+				s.WriteString(descIndent)
+				s.WriteString(fmt.Sprintf("%s %s", k, v))
+				strs = append(strs, s.String())
+			}
+
+			constraints := schemaConstraintStrings(param.Schema)
+			if len(constraints) > 0 {
+				var s strings.Builder
+				k := operationPageParameterPropertyKeyStyle.Render("Constraints:")
+				v := operationPageParameterPropertyValueStyle.Render(strings.Join(constraints, ", "))
+				s.WriteString(descIndent)
+				s.WriteString(fmt.Sprintf("%s %s", k, v))
+				strs = append(strs, s.String())
+			}
+		}
 	}
 	return strings.Join(strs, "\n")
 }
@@ -234,6 +290,7 @@ func (m operationPageModel) Update(msg tea.Msg) (operationPageModel, tea.Cmd) {
 			return m, goBack
 		}
 	case selectOperationMsg:
+		m.reset()
 		m.updateOperation(msg.operationId)
 		m.updateContent()
 		return m, nil

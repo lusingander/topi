@@ -178,9 +178,22 @@ func convertSchema(schema *openapi3.SchemaRef) *topi.Schema {
 	if schema == nil || schema.Value == nil {
 		return nil
 	}
+	sc := schema.Value
 	return &topi.Schema{
-		Type:   schema.Value.Type,
-		Format: schema.Value.Format,
+		Type:         sc.Type,
+		Format:       sc.Format,
+		Default:      sc.Default,
+		Min:          sc.Min,
+		Max:          sc.Max,
+		ExclusiveMin: sc.ExclusiveMin,
+		ExclusiveMax: sc.ExclusiveMax,
+		MultipleOf:   sc.MultipleOf,
+		MinLength:    sc.MinLength,
+		MaxLength:    sc.MaxLength,
+		Pattern:      sc.Pattern,
+		MinItems:     sc.MinItems,
+		MaxItems:     sc.MaxItems,
+		Items:        convertSchema(sc.Items),
 	}
 }
 

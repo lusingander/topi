@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	UntaggedDummyTag = "<<untagged>>"
+	UntaggedDummyTag = "<untagged>"
 )
 
 type Document struct {
@@ -161,8 +161,23 @@ type Parameter struct {
 }
 
 type Schema struct {
-	Type   string
-	Format string
+	Type    string
+	Format  string
+	Default interface{}
+
+	Min          *float64
+	Max          *float64
+	ExclusiveMin bool
+	ExclusiveMax bool
+	MultipleOf   *float64
+
+	MinLength uint64
+	MaxLength *uint64
+	Pattern   string
+
+	MinItems uint64
+	MaxItems *uint64
+	Items    *Schema
 }
 
 type Tag struct {
