@@ -106,6 +106,7 @@ type Path struct {
 	QueryParameters  []*Parameter
 	HeaderParameters []*Parameter
 	CookieParameters []*Parameter
+	RequestBody      *RequestBody
 }
 
 func comparePath(p1, p2 *Path) bool {
@@ -161,24 +162,46 @@ type Parameter struct {
 }
 
 type Schema struct {
-	Type    string
-	Format  string
-	Default interface{}
-	Enum    []interface{}
+	Type        string
+	Format      string
+	Default     interface{}
+	Enum        []interface{}
+	Description string
+	Deprecated  bool
+	ReadOnly    bool
+	WriteOnly   bool
 
+	// number/integer
 	Min          *float64
 	Max          *float64
 	ExclusiveMin bool
 	ExclusiveMax bool
 	MultipleOf   *float64
 
+	// string
 	MinLength uint64
 	MaxLength *uint64
 	Pattern   string
 
+	// array
 	MinItems uint64
 	MaxItems *uint64
 	Items    *Schema
+
+	// object
+	Required   []string
+	Properties map[string]*Schema
+}
+
+type RequestBody struct {
+	Description string
+	Required    bool
+	Conetnt     []*MediaTypeContent
+}
+
+type MediaTypeContent struct {
+	MediaType string
+	Schema    *Schema
 }
 
 type Tag struct {

@@ -133,6 +133,7 @@ func convertOperation(pathItem *openapi3.PathItem, op *openapi3.Operation, metho
 		QueryParameters:  convertParameters(params, "query"),
 		HeaderParameters: convertParameters(params, "header"),
 		CookieParameters: convertParameters(params, "cookie"),
+		RequestBody:      convertRequestBody(op.RequestBody),
 	}
 	return ret
 }
@@ -184,6 +185,10 @@ func convertSchema(schema *openapi3.SchemaRef) *topi.Schema {
 		Format:       sc.Format,
 		Default:      sc.Default,
 		Enum:         sc.Enum,
+		Description:  sc.Description,
+		Deprecated:   sc.Deprecated,
+		ReadOnly:     sc.ReadOnly,
+		WriteOnly:    sc.WriteOnly,
 		Min:          sc.Min,
 		Max:          sc.Max,
 		ExclusiveMin: sc.ExclusiveMin,
@@ -195,7 +200,41 @@ func convertSchema(schema *openapi3.SchemaRef) *topi.Schema {
 		MinItems:     sc.MinItems,
 		MaxItems:     sc.MaxItems,
 		Items:        convertSchema(sc.Items),
+		Required:     sc.Required,
+		Properties:   convertSchemas(sc.Properties),
 	}
+}
+
+func convertSchemas(s openapi3.Schemas) map[string]*topi.Schema {
+	ret := make(map[string]*topi.Schema)
+	for k, v := range s {
+		ret[k] = convertSchema(v)
+	}
+	return ret
+}
+
+func convertRequestBody(body *openapi3.RequestBodyRef) *topi.RequestBody {
+	if body == nil || body.Value == nil {
+		return nil
+	}
+	b := body.Value
+	return &topi.RequestBody{
+		Description: b.Description,
+		Required:    b.Required,
+		Conetnt:     convertContent(b.Content),
+	}
+}
+
+func convertContent(content openapi3.Content) []*topi.MediaTypeContent {
+	ret := make([]*topi.MediaTypeContent, 0)
+	for k, v := range content {
+		c := &topi.MediaTypeContent{
+			MediaType: k,
+			Schema:    convertSchema(v.Schema),
+		}
+		ret = append(ret, c)
+	}
+	return ret
 }
 
 func convertTags(tags openapi3.Tags) []*topi.Tag {

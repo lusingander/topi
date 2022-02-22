@@ -47,6 +47,9 @@ var (
 	operationPageSectionSubHeaderStyle = operationPageSectionHeaderStyle.Copy().
 						Margin(0, 0, 0, 1)
 
+	opearationPageRequestBodyMediaTypeColorStyle = lipgloss.NewStyle().
+							Foreground(lipgloss.Color("70"))
+
 	operationPageParameterItemsStyle = operationPageItemStyle.Copy().
 						Margin(0, 0, 0, 2)
 
@@ -182,6 +185,15 @@ func (m *operationPageModel) updateContent() {
 		content.WriteString(operationPageParameterItemsStyle.Render(m.styledParams(op.CookieParameters)))
 	}
 
+	if op.RequestBody != nil && len(op.RequestBody.Conetnt) > 0 {
+		for _, c := range op.RequestBody.Conetnt {
+			requestBodyMediaType := opearationPageRequestBodyMediaTypeColorStyle.Render(fmt.Sprintf("[%s]", c.MediaType))
+			requestBodySectionHeader := operationPageSectionSubHeaderStyle.Render("Request body")
+			content.WriteString(operationPageItemStyle.Render(fmt.Sprintf("%s  %s", requestBodySectionHeader, requestBodyMediaType)))
+			content.WriteString(operationPageParameterItemsStyle.Render(styledSchema(c.Schema, 1, false)))
+		}
+	}
+
 	responseSectionHeader := operationPageSectionHeaderStyle.Render("Response")
 	content.WriteString(operationPageItemStyle.Render(responseSectionHeader))
 
@@ -199,81 +211,127 @@ func (operationPageModel) styledParams(params []*topi.Parameter) string {
 		}
 	}
 	nameAreaWidth += 1 // requred marker
-	schemaIndent := "  "
-	descIndent := strings.Repeat(" ", nameAreaWidth+len(schemaIndent))
 
 	for _, param := range params {
+		ss := styledSingleParam(param.Schema, param.Name, param.Description, param.Required, param.Deprecated, nameAreaWidth, 1)
+		strs = append(strs, ss...)
+	}
+	return strings.Join(strs, "\n")
+}
+
+func styledSchema(sc *topi.Schema, indentLevel int, read bool) string {
+	if sc.Type == "object" {
+
+		nameAreaWidth := 0
+		for name := range sc.Properties {
+			w := len(name)
+			if nameAreaWidth < w {
+				nameAreaWidth = w
+			}
+		}
+		nameAreaWidth += 1 // requred marker
+
+		strs := make([]string, 0)
+		for name, prop := range sc.Properties { // fixme: fix order
+			if read {
+				if prop.WriteOnly {
+					continue
+				}
+			} else {
+				if prop.ReadOnly {
+					continue
+				}
+			}
+			required := false
+			for _, r := range sc.Required {
+				if name == r {
+					required = true
+				}
+			}
+
+			ss := styledSingleParam(prop, name, prop.Description, required, prop.Deprecated, nameAreaWidth, indentLevel)
+			strs = append(strs, ss...)
+		}
+		return strings.Join(strs, "\n")
+	}
+	return schemaTypeString(sc)
+}
+
+func styledSingleParam(schema *topi.Schema, name, description string, required, deprecated bool, nameAreaWidth, indentLevel int) []string {
+	strs := make([]string, 0)
+
+	schemaIndent := strings.Repeat("  ", indentLevel)
+	descIndent := strings.Repeat(" ", nameAreaWidth+len(schemaIndent))
+
+	var s strings.Builder
+
+	if deprecated {
+		name = operationPageParameterDeprecatedNameStyle.Render(name)
+	}
+	if required {
+		name += operationPageParameterRequiredMarkerColorStyle.Render("*")
+	}
+	s.WriteString(padding.String(name, uint(nameAreaWidth)))
+
+	if schema != nil {
+		schemaType := schemaTypeString(schema)
+		s.WriteString(schemaIndent)
+		s.WriteString(operationPageParameterTypeColorStyle.Render(schemaType))
+	}
+
+	if deprecated {
+		s.WriteString(" ")
+		s.WriteString(operationPageDeprecatedMarkerStyle.Render("Deprecated"))
+	}
+
+	strs = append(strs, s.String())
+
+	if description != "" {
 		var s strings.Builder
-
-		name := param.Name
-		if param.Deprecated {
-			name = operationPageParameterDeprecatedNameStyle.Render(name)
-		}
-		if param.Required {
-			name += operationPageParameterRequiredMarkerColorStyle.Render("*")
-		}
-		s.WriteString(padding.String(name, uint(nameAreaWidth)))
-
-		if param.Schema != nil {
-			schemaType := schemaTypeString(param.Schema)
-			s.WriteString(schemaIndent)
-			s.WriteString(operationPageParameterTypeColorStyle.Render(schemaType))
-		}
-
-		if param.Deprecated {
-			s.WriteString(" ")
-			s.WriteString(operationPageDeprecatedMarkerStyle.Render("Deprecated"))
-		}
-
+		s.WriteString(descIndent)
+		s.WriteString(description) // fixme: render as md, consider width
 		strs = append(strs, s.String())
+	}
 
-		if param.Description != "" {
+	if schema != nil {
+		if schema.Default != nil {
 			var s strings.Builder
+			k := operationPageParameterPropertyKeyStyle.Render("Default:")
+			v := operationPageParameterPropertyValueStyle.Render(fmt.Sprintf("%v", schema.Default))
 			s.WriteString(descIndent)
-			s.WriteString(param.Description) // fixme: render as md, consider width
+			s.WriteString(fmt.Sprintf("%s %s", k, v))
 			strs = append(strs, s.String())
 		}
 
-		if param.Schema != nil {
-			if param.Schema.Default != nil {
-				var s strings.Builder
-				k := operationPageParameterPropertyKeyStyle.Render("Default:")
-				v := operationPageParameterPropertyValueStyle.Render(fmt.Sprintf("%v", param.Schema.Default))
-				s.WriteString(descIndent)
-				s.WriteString(fmt.Sprintf("%s %s", k, v))
-				strs = append(strs, s.String())
-			}
+		if len(schema.Enum) > 0 {
+			var s strings.Builder
+			k := operationPageParameterPropertyKeyStyle.Render("Enum:")
+			v := operationPageParameterPropertyValueStyle.Render(sliceString(schema.Enum))
+			s.WriteString(descIndent)
+			s.WriteString(fmt.Sprintf("%s %s", k, v))
+			strs = append(strs, s.String())
+		}
 
-			if len(param.Schema.Enum) > 0 {
-				var s strings.Builder
-				k := operationPageParameterPropertyKeyStyle.Render("Enum:")
-				v := operationPageParameterPropertyValueStyle.Render(sliceString(param.Schema.Enum))
-				s.WriteString(descIndent)
-				s.WriteString(fmt.Sprintf("%s %s", k, v))
-				strs = append(strs, s.String())
-			}
+		if schema.Type == "array" && len(schema.Items.Enum) > 0 {
+			var s strings.Builder
+			k := operationPageParameterPropertyKeyStyle.Render("Items Enum:")
+			v := operationPageParameterPropertyValueStyle.Render(sliceString(schema.Items.Enum))
+			s.WriteString(descIndent)
+			s.WriteString(fmt.Sprintf("%s %s", k, v))
+			strs = append(strs, s.String())
+		}
 
-			if param.Schema.Type == "array" && len(param.Schema.Items.Enum) > 0 {
-				var s strings.Builder
-				k := operationPageParameterPropertyKeyStyle.Render("Items Enum:")
-				v := operationPageParameterPropertyValueStyle.Render(sliceString(param.Schema.Items.Enum))
-				s.WriteString(descIndent)
-				s.WriteString(fmt.Sprintf("%s %s", k, v))
-				strs = append(strs, s.String())
-			}
-
-			constraints := schemaConstraintStrings(param.Schema)
-			if len(constraints) > 0 {
-				var s strings.Builder
-				k := operationPageParameterPropertyKeyStyle.Render("Constraints:")
-				v := operationPageParameterPropertyValueStyle.Render(strings.Join(constraints, ", "))
-				s.WriteString(descIndent)
-				s.WriteString(fmt.Sprintf("%s %s", k, v))
-				strs = append(strs, s.String())
-			}
+		constraints := schemaConstraintStrings(schema)
+		if len(constraints) > 0 {
+			var s strings.Builder
+			k := operationPageParameterPropertyKeyStyle.Render("Constraints:")
+			v := operationPageParameterPropertyValueStyle.Render(strings.Join(constraints, ", "))
+			s.WriteString(descIndent)
+			s.WriteString(fmt.Sprintf("%s %s", k, v))
+			strs = append(strs, s.String())
 		}
 	}
-	return strings.Join(strs, "\n")
+	return strs
 }
 
 func (m operationPageModel) styledMethod() string {
