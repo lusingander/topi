@@ -224,6 +224,9 @@ func (m *operationPageModel) updateContent() {
 		}
 
 		for _, c := range response.Conetnt {
+			if c.Schema == nil {
+				continue
+			}
 			requestBodyMediaType := opearationPageRequestBodyMediaTypeColorStyle.Render(fmt.Sprintf("[%s]", c.MediaType))
 			content.WriteString(operationPageItemStyle.Render(requestBodyMediaType))
 			content.WriteString(operationPageParameterItemsStyle.Render(styledSchema(c.Schema, 1, true)))
@@ -253,9 +256,6 @@ func (operationPageModel) styledParams(params []*topi.Parameter) string {
 }
 
 func styledSchema(sc *topi.Schema, indentLevel int, read bool) string {
-	if sc == nil {
-		return ""
-	}
 	if sc.Type == "object" {
 
 		nameAreaWidth := 0

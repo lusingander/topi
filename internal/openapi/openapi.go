@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/url"
 	"path/filepath"
+	"sort"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/lusingander/topi/internal/topi"
@@ -248,6 +249,8 @@ func convertResponses(responses openapi3.Responses) []*topi.Response {
 		}
 		ret = append(ret, r)
 	}
+	// sort to fix order because openapi3.Responses is map
+	sort.Slice(ret, func(i, j int) bool { return ret[i].StatusCode < ret[j].StatusCode })
 	return ret
 }
 
