@@ -134,6 +134,7 @@ func convertOperation(pathItem *openapi3.PathItem, op *openapi3.Operation, metho
 		HeaderParameters: convertParameters(params, "header"),
 		CookieParameters: convertParameters(params, "cookie"),
 		RequestBody:      convertRequestBody(op.RequestBody),
+		Responses:        convertResponses(op.Responses),
 	}
 	return ret
 }
@@ -233,6 +234,19 @@ func convertContent(content openapi3.Content) []*topi.MediaTypeContent {
 			Schema:    convertSchema(v.Schema),
 		}
 		ret = append(ret, c)
+	}
+	return ret
+}
+
+func convertResponses(responses openapi3.Responses) []*topi.Response {
+	ret := make([]*topi.Response, 0)
+	for status, response := range responses {
+		r := &topi.Response{
+			StatusCode:  status,
+			Description: *response.Value.Description, // required
+			Conetnt:     convertContent(response.Value.Content),
+		}
+		ret = append(ret, r)
 	}
 	return ret
 }

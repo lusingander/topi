@@ -17,6 +17,15 @@ func openInBrowser(url string) error {
 	return browser.OpenURL(url)
 }
 
+func containsString(v string, ss []string) bool {
+	for _, s := range ss {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
+
 func boolPtr(b bool) *bool {
 	return &b
 }

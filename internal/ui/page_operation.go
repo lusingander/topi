@@ -69,6 +69,15 @@ var (
 	operationPageParameterPropertyValueStyle = lipgloss.NewStyle().
 							Foreground(lipgloss.Color("167"))
 
+	operationPageSectionSubHeaderSuccessStatusCodeStyle = operationPageSectionSubHeaderStyle.Copy().
+								Foreground(lipgloss.Color("77"))
+
+	operationPageSectionSubHeaderErrorStatusCodeStyle = operationPageSectionSubHeaderStyle.Copy().
+								Foreground(lipgloss.Color("168"))
+
+	operationPageSectionSubHeaderDefaultStatusCodeStyle = operationPageSectionSubHeaderStyle.Copy().
+								Foreground(lipgloss.Color("32"))
+
 	operationPageItemStyle = lipgloss.NewStyle().
 				Padding(1, 2)
 )
@@ -197,6 +206,30 @@ func (m *operationPageModel) updateContent() {
 	responseSectionHeader := operationPageSectionHeaderStyle.Render("Response")
 	content.WriteString(operationPageItemStyle.Render(responseSectionHeader))
 
+	for _, response := range op.Responses {
+		var statusCode string
+		if response.Success() {
+			statusCode = operationPageSectionSubHeaderSuccessStatusCodeStyle.Render(response.StatusCode)
+		} else if response.Error() {
+			statusCode = operationPageSectionSubHeaderErrorStatusCodeStyle.Render(response.StatusCode)
+		} else {
+			statusCode = operationPageSectionSubHeaderDefaultStatusCodeStyle.Render(response.StatusCode)
+		}
+		content.WriteString(operationPageItemStyle.Render(statusCode))
+
+		if response.Description != "" {
+			desc, _ := r.Render(response.Description)
+			desc = operationPageParameterItemsStyle.Render(desc)
+			content.WriteString(desc)
+		}
+
+		for _, c := range response.Conetnt {
+			requestBodyMediaType := opearationPageRequestBodyMediaTypeColorStyle.Render(fmt.Sprintf("[%s]", c.MediaType))
+			content.WriteString(operationPageItemStyle.Render(requestBodyMediaType))
+			content.WriteString(operationPageParameterItemsStyle.Render(styledSchema(c.Schema, 1, true)))
+		}
+	}
+
 	m.viewport.SetContent(content.String())
 }
 
@@ -220,6 +253,9 @@ func (operationPageModel) styledParams(params []*topi.Parameter) string {
 }
 
 func styledSchema(sc *topi.Schema, indentLevel int, read bool) string {
+	if sc == nil {
+		return ""
+	}
 	if sc.Type == "object" {
 
 		nameAreaWidth := 0
@@ -242,13 +278,7 @@ func styledSchema(sc *topi.Schema, indentLevel int, read bool) string {
 					continue
 				}
 			}
-			required := false
-			for _, r := range sc.Required {
-				if name == r {
-					required = true
-				}
-			}
-
+			required := containsString(name, sc.Required)
 			ss := styledSingleParam(prop, name, prop.Description, required, prop.Deprecated, nameAreaWidth, indentLevel)
 			strs = append(strs, ss...)
 		}

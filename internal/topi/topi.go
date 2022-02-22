@@ -107,6 +107,7 @@ type Path struct {
 	HeaderParameters []*Parameter
 	CookieParameters []*Parameter
 	RequestBody      *RequestBody
+	Responses        []*Response
 }
 
 func comparePath(p1, p2 *Path) bool {
@@ -202,6 +203,20 @@ type RequestBody struct {
 type MediaTypeContent struct {
 	MediaType string
 	Schema    *Schema
+}
+
+type Response struct {
+	StatusCode  string
+	Description string
+	Conetnt     []*MediaTypeContent
+}
+
+func (r *Response) Success() bool {
+	return strings.HasPrefix(r.StatusCode, "2")
+}
+
+func (r *Response) Error() bool {
+	return strings.HasPrefix(r.StatusCode, "4") || strings.HasPrefix(r.StatusCode, "5")
 }
 
 type Tag struct {
