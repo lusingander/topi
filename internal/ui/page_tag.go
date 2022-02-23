@@ -78,10 +78,14 @@ func (m tagPageModel) Update(msg tea.Msg) (tagPageModel, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.delegateKeys.back):
-			return m, goBack
+			if m.list.FilterState() != list.Filtering {
+				return m, goBack
+			}
 		case key.Matches(msg, m.delegateKeys.enter):
-			tag := m.list.SelectedItem().(tagPageListItem).tag
-			return m, selectTag(tag.Name)
+			if m.list.FilterState() != list.Filtering {
+				tag := m.list.SelectedItem().(tagPageListItem).tag
+				return m, selectTag(tag.Name)
+			}
 		}
 	case selectTagMenuMsg:
 		m.updateItems()
@@ -95,4 +99,8 @@ func (m tagPageModel) Update(msg tea.Msg) (tagPageModel, tea.Cmd) {
 
 func (m tagPageModel) View() string {
 	return m.list.View()
+}
+
+func (m tagPageModel) statusString() string {
+	return listStatusString(m.list)
 }

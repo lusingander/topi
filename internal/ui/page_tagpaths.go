@@ -81,8 +81,10 @@ func (m tagPathsPageModel) Update(msg tea.Msg) (tagPathsPageModel, tea.Cmd) {
 				return m, goBack
 			}
 		case key.Matches(msg, m.delegateKeys.enter):
-			path := m.list.SelectedItem().(tagPathsPageListItem).path
-			return m, selectOperation(path.OperationId)
+			if m.list.FilterState() != list.Filtering {
+				path := m.list.SelectedItem().(tagPathsPageListItem).path
+				return m, selectOperation(path.OperationId)
+			}
 		}
 	case selectTagMsg:
 		m.updateList(msg.tag)
@@ -96,4 +98,8 @@ func (m tagPathsPageModel) Update(msg tea.Msg) (tagPathsPageModel, tea.Cmd) {
 
 func (m tagPathsPageModel) View() string {
 	return m.list.View()
+}
+
+func (m tagPathsPageModel) statusString() string {
+	return listStatusString(m.list)
 }

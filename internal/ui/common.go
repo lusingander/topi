@@ -1,6 +1,11 @@
 package ui
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"fmt"
+
+	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/lipgloss"
+)
 
 var (
 	baseStyle = lipgloss.NewStyle().Margin(1, 1)
@@ -56,3 +61,15 @@ var (
 	httpMethodDeprecatedColor         = lipgloss.Color("246")
 	httpMethodSelectedDeprecatedColor = lipgloss.Color("243")
 )
+
+func listStatusString(l list.Model) string {
+	if l.FilterState() == list.Filtering {
+		return "Filter: " + l.FilterValue()
+	}
+	if l.FilterState() == list.FilterApplied {
+		filter := l.FilterValue()
+		visible := l.VisibleItems()
+		return fmt.Sprintf("Filter: %s  (matched %d items)", filter, len(visible))
+	}
+	return ""
+}

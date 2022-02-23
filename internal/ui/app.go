@@ -22,8 +22,7 @@ var (
 	statusbarSpaceColorStyle = lipgloss.NewStyle().
 					Background(lipgloss.Color("237"))
 
-	statusbarLowerStyle = lipgloss.NewStyle().
-				Padding(0, 1)
+	statusbarLowerStyle = lipgloss.NewStyle()
 )
 
 type page interface {
@@ -246,8 +245,30 @@ func (m model) appFooter() string {
 	spaces := strings.Repeat(" ", w-lipgloss.Width(name))
 	spaces = statusbarSpaceColorStyle.Render(spaces)
 	u := name + spaces
-	l := statusbarLowerStyle.Render("")
+	status := m.statusString()
+	l := statusbarLowerStyle.Render(status)
 	return footerStyle.Render(u + "\n" + l)
+}
+
+func (m model) statusString() string {
+	switch m.currentPage().(type) {
+	case menuPage:
+		return ""
+	case infoPage:
+		return ""
+	case tagPage:
+		return m.tagPage.statusString()
+	case tagPathsPage:
+		return m.tagPathsPage.statusString()
+	case operationPage:
+		return ""
+	case helpPage:
+		return ""
+	case aboutPage:
+		return ""
+	default:
+		return "error... :("
+	}
 }
 
 func Start(doc *topi.Document) error {
