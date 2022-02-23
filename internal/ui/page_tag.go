@@ -61,6 +61,7 @@ func (m *tagPageModel) updateItems() {
 
 func (m *tagPageModel) reset() {
 	m.list.ResetSelected()
+	m.list.ResetFilter()
 }
 
 func (m *tagPageModel) SetSize(w, h int) {

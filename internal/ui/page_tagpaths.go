@@ -63,6 +63,11 @@ func (m *tagPathsPageModel) updateList(tag string) {
 	m.list.SetItems(items)
 }
 
+func (m *tagPathsPageModel) reset() {
+	m.list.ResetSelected()
+	m.list.ResetFilter()
+}
+
 func (m tagPathsPageModel) Init() tea.Cmd {
 	return nil
 }
@@ -81,6 +86,7 @@ func (m tagPathsPageModel) Update(msg tea.Msg) (tagPathsPageModel, tea.Cmd) {
 		}
 	case selectTagMsg:
 		m.updateList(msg.tag)
+		m.reset()
 		return m, nil
 	}
 	var cmd tea.Cmd
