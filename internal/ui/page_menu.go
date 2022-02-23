@@ -8,6 +8,7 @@ import (
 
 const (
 	menuPageInfoMenu  = "Info"
+	menuPageTagsMenu  = "Tags"
 	menuPagePathsMenu = "Paths"
 	menuPageHelpMenu  = "Help"
 )
@@ -18,8 +19,12 @@ var menuPageItems = []list.Item{
 		description: "Show API information",
 	},
 	menuPageListItem{
+		title:       menuPageTagsMenu,
+		description: "Show all tags",
+	},
+	menuPageListItem{
 		title:       menuPagePathsMenu,
-		description: "Show all paths (grouped by tags)",
+		description: "Show all paths",
 	},
 	menuPageListItem{
 		title:       menuPageHelpMenu,
@@ -78,8 +83,10 @@ func (m menuPageModel) Update(msg tea.Msg) (menuPageModel, tea.Cmd) {
 			switch menu.title {
 			case menuPageInfoMenu:
 				return m, selectInfoMenu
-			case menuPagePathsMenu:
+			case menuPageTagsMenu:
 				return m, selectTagMenu
+			case menuPagePathsMenu:
+				return m, selectPathMenu
 			case menuPageHelpMenu:
 				return m, selectHelpMenu
 			}

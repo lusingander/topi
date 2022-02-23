@@ -47,6 +47,10 @@ type tagPathsPage struct {
 
 func (p tagPathsPage) crumb() string { return p.tag }
 
+type pathPage struct{}
+
+func (pathPage) crumb() string { return "paths" }
+
 type operationPage struct {
 	operationId string
 }
@@ -106,6 +110,7 @@ type model struct {
 	infoPage      infoPageModel
 	tagPage       tagPageModel
 	tagPathsPage  tagPathsPageModel
+	pathPage      pathPageModel
 	operationPage operationPageModel
 	helpPage      helpPageModel
 	aboutPage     aboutPageModel
@@ -124,6 +129,7 @@ func newModel(doc *topi.Document) model {
 		menuPage:      newMenuPageModel(),
 		tagPage:       newTagPageModel(doc),
 		tagPathsPage:  newTagPathsPageModel(doc),
+		pathPage:      newPathPageModel(doc),
 		operationPage: newOperationPageModel(doc),
 		helpPage:      newHelpPageModel(),
 		aboutPage:     newAboutPageModel(),
@@ -142,6 +148,7 @@ func (m *model) SetSize(w, h int) {
 	m.infoPage.SetSize(w, h)
 	m.tagPage.SetSize(w, h)
 	m.tagPathsPage.SetSize(w, h)
+	m.pathPage.SetSize(w, h)
 	m.operationPage.SetSize(w, h)
 	m.helpPage.SetSize(w, h)
 	m.aboutPage.SetSize(w, h)
@@ -165,6 +172,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.pushPage(infoPage{})
 	case selectTagMenuMsg:
 		m.pushPage(tagPage{})
+	case selectPathMenuMsg:
+		m.pushPage(pathPage{})
 	case selectHelpMenuMsg:
 		m.pushPage(helpPage{})
 	case selectAboutMenuMsg:
@@ -188,6 +197,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	case tagPathsPage:
 		m.tagPathsPage, cmd = m.tagPathsPage.Update(msg)
+		return m, cmd
+	case pathPage:
+		m.pathPage, cmd = m.pathPage.Update(msg)
 		return m, cmd
 	case operationPage:
 		m.operationPage, cmd = m.operationPage.Update(msg)
@@ -220,6 +232,8 @@ func (m model) content() string {
 		return m.tagPage.View()
 	case tagPathsPage:
 		return m.tagPathsPage.View()
+	case pathPage:
+		return m.pathPage.View()
 	case operationPage:
 		return m.operationPage.View()
 	case helpPage:
@@ -260,6 +274,8 @@ func (m model) statusString() string {
 		return m.tagPage.statusString()
 	case tagPathsPage:
 		return m.tagPathsPage.statusString()
+	case pathPage:
+		return m.pathPage.statusString()
 	case operationPage:
 		return ""
 	case helpPage:

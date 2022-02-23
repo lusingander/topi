@@ -14,6 +14,12 @@ func selectTagMenu() tea.Msg {
 	return selectTagMenuMsg{}
 }
 
+type selectPathMenuMsg struct{}
+
+func selectPathMenu() tea.Msg {
+	return selectPathMenuMsg{}
+}
+
 type selectHelpMenuMsg struct{}
 
 func selectHelpMenu() tea.Msg {
