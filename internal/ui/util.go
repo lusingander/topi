@@ -45,3 +45,15 @@ func float64Pointer(v float64) *float64 {
 func uint64Pointer(v uint64) *uint64 {
 	return &v
 }
+
+func digit(n uint) uint {
+	if n == 0 {
+		return 1
+	}
+	var c uint
+	for n > 0 {
+		n /= 10
+		c++
+	}
+	return c
+}

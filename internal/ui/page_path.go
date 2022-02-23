@@ -102,6 +102,10 @@ func (m pathPageModel) View() string {
 	return m.list.View()
 }
 
-func (m pathPageModel) statusString() string {
-	return listStatusString(m.list)
+func (m pathPageModel) statusbarInfoString() string {
+	return listStatusbarInfoString(m.list)
+}
+
+func (m pathPageModel) statusMessageString() string {
+	return listStatusMessageString(m.list)
 }

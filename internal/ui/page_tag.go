@@ -101,6 +101,10 @@ func (m tagPageModel) View() string {
 	return m.list.View()
 }
 
-func (m tagPageModel) statusString() string {
-	return listStatusString(m.list)
+func (m tagPageModel) statusbarInfoString() string {
+	return listStatusbarInfoString(m.list)
+}
+
+func (m tagPageModel) statusMessageString() string {
+	return listStatusMessageString(m.list)
 }

@@ -100,6 +100,10 @@ func (m tagPathsPageModel) View() string {
 	return m.list.View()
 }
 
-func (m tagPathsPageModel) statusString() string {
-	return listStatusString(m.list)
+func (m tagPathsPageModel) statusbarInfoString() string {
+	return listStatusbarInfoString(m.list)
+}
+
+func (m tagPathsPageModel) statusMessageString() string {
+	return listStatusMessageString(m.list)
 }

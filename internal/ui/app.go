@@ -256,26 +256,50 @@ func (m model) appFooter() string {
 		return ""
 	}
 	name := statusbarFileNameStyle.Render(m.doc.Meta.FileName)
-	spaces := strings.Repeat(" ", w-lipgloss.Width(name))
-	spaces = statusbarSpaceColorStyle.Render(spaces)
-	u := name + spaces
-	status := m.statusString()
-	l := statusbarLowerStyle.Render(status)
+	statusbarInfo := m.statusbarInfoString()
+	sw := w - lipgloss.Width(name) - lipgloss.Width(statusbarInfo)
+	spaces := statusbarSpaceColorStyle.Render(strings.Repeat(" ", sw))
+	u := name + spaces + statusbarInfo
+	statusMessage := m.statusMessageString()
+	l := statusbarLowerStyle.Render(statusMessage)
 	return footerStyle.Render(u + "\n" + l)
 }
 
-func (m model) statusString() string {
+func (m model) statusbarInfoString() string {
 	switch m.currentPage().(type) {
 	case menuPage:
 		return ""
 	case infoPage:
 		return ""
 	case tagPage:
-		return m.tagPage.statusString()
+		return m.tagPage.statusbarInfoString()
 	case tagPathsPage:
-		return m.tagPathsPage.statusString()
+		return m.tagPathsPage.statusbarInfoString()
 	case pathPage:
-		return m.pathPage.statusString()
+		return m.pathPage.statusbarInfoString()
+	case operationPage:
+		return ""
+	case helpPage:
+		return ""
+	case aboutPage:
+		return ""
+	default:
+		return "error... :("
+	}
+}
+
+func (m model) statusMessageString() string {
+	switch m.currentPage().(type) {
+	case menuPage:
+		return ""
+	case infoPage:
+		return ""
+	case tagPage:
+		return m.tagPage.statusMessageString()
+	case tagPathsPage:
+		return m.tagPathsPage.statusMessageString()
+	case pathPage:
+		return m.pathPage.statusMessageString()
 	case operationPage:
 		return ""
 	case helpPage:

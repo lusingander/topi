@@ -62,14 +62,28 @@ var (
 	httpMethodSelectedDeprecatedColor = lipgloss.Color("243")
 )
 
-func listStatusString(l list.Model) string {
-	if l.FilterState() == list.Filtering {
-		return "Filter: " + l.FilterValue()
+var (
+	listStatusbarInfoStyle = lipgloss.NewStyle().
+		Background(lipgloss.Color("247")).
+		Foreground(lipgloss.Color("238")).
+		Padding(0, 1)
+)
+
+func listStatusbarInfoString(l list.Model) string {
+	if l.FilterState() == list.Filtering && l.FilterValue() != "" {
+		n := len(l.VisibleItems())
+		m := uint(len(l.Items()))
+		s := fmt.Sprintf("matched: %*d", digit(m), n)
+		return listStatusbarInfoStyle.Render(s)
 	}
-	if l.FilterState() == list.FilterApplied {
-		filter := l.FilterValue()
-		visible := l.VisibleItems()
-		return fmt.Sprintf("Filter: %s  (matched %d items)", filter, len(visible))
+	n := uint(len(l.VisibleItems()))
+	s := fmt.Sprintf("%*d / %d", digit(n), l.Index()+1, n)
+	return listStatusbarInfoStyle.Render(s)
+}
+
+func listStatusMessageString(l list.Model) string {
+	if l.FilterState() == list.Filtering || l.FilterState() == list.FilterApplied {
+		return "Filter: " + l.FilterValue()
 	}
 	return ""
 }
