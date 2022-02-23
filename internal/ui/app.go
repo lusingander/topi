@@ -1,32 +1,65 @@
 package ui
 
 import (
+	"strings"
+
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/lusingander/topi/internal/topi"
 )
 
-type page interface{}
+var (
+	headerStyle = lipgloss.NewStyle().
+		Foreground(lipgloss.Color("65")).
+		Padding(0, 1)
+)
+
+type page interface {
+	crumb() string
+}
 
 type menuPage struct{}
 
+func (menuPage) crumb() string { return topi.AppName }
+
 type infoPage struct{}
 
+func (infoPage) crumb() string { return "info" }
+
 type tagPage struct{}
+
+func (tagPage) crumb() string { return "tags" }
 
 type tagPathsPage struct {
 	tag string
 }
 
+func (p tagPathsPage) crumb() string { return p.tag }
+
 type operationPage struct {
 	operationId string
 }
 
+func (p operationPage) crumb() string { return p.operationId } // fixme
+
 type helpPage struct{}
+
+func (helpPage) crumb() string { return "help" }
 
 type aboutPage struct{}
 
+func (aboutPage) crumb() string { return "about" }
+
 type pageStack struct {
 	stack []page
+}
+
+func (s pageStack) crumbs() []string {
+	ret := make([]string, len(s.stack))
+	for i, p := range s.stack {
+		ret[i] = p.crumb()
+	}
+	return ret
 }
 
 func newPageStack(p page) *pageStack {
@@ -107,8 +140,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
-		top, right, bottom, left := baseStyle.GetMargin()
-		m.SetSize(msg.Width-left-right, msg.Height-top-bottom)
+		t, r, b, l := baseStyle.GetMargin()
+		m.SetSize(msg.Width-l-r, msg.Height-t-b)
 	case selectInfoMenuMsg:
 		m.pushPage(infoPage{})
 	case selectTagMenuMsg:
@@ -152,7 +185,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	return baseStyle.Render(m.content())
+	header := m.appHeader()
+	content := baseStyle.Render(m.content())
+	return header + content
 }
 
 func (m model) content() string {
@@ -174,6 +209,11 @@ func (m model) content() string {
 	default:
 		return "error... :("
 	}
+}
+
+func (m model) appHeader() string {
+	bd := strings.Join(m.crumbs(), " > ")
+	return headerStyle.Render(bd)
 }
 
 func Start(doc *topi.Document) error {

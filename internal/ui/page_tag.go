@@ -21,7 +21,11 @@ func newTagPageModel(doc *topi.Document) tagPageModel {
 	m.delegateKeys = newTagPageDelegateKeyMap()
 	delegate := newTagPageListDelegate()
 	m.list = list.New(nil, delegate, 0, 0)
-	m.list.Title = topi.AppName
+	m.list.SetShowTitle(false)
+	m.list.SetShowHelp(false)
+	m.list.SetShowStatusBar(false)
+	m.list.SetShowFilter(false)
+	m.list.SetShowPagination(false)
 	return m
 }
 

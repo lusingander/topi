@@ -4,7 +4,6 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/lusingander/topi/internal/topi"
 )
 
 const (
@@ -39,7 +38,11 @@ func newMenuPageModel() menuPageModel {
 	m.delegateKeys = newMenuPageDelegateKeyMap()
 	delegate := newMenuPageListDelegate()
 	m.list = list.New(menuPageItems, delegate, 0, 0)
-	m.list.Title = topi.AppName
+	m.list.SetShowTitle(false)
+	m.list.SetShowHelp(false)
+	m.list.SetShowStatusBar(false)
+	m.list.SetShowFilter(false)
+	m.list.SetShowPagination(false)
 	return m
 }
 

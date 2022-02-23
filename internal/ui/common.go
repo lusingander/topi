@@ -3,7 +3,7 @@ package ui
 import "github.com/charmbracelet/lipgloss"
 
 var (
-	baseStyle = lipgloss.NewStyle().Margin(1, 2)
+	baseStyle = lipgloss.NewStyle().Margin(2, 1)
 
 	selectedColor = lipgloss.Color("70")
 
