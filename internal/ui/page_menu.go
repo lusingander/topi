@@ -49,6 +49,7 @@ func newMenuPageModel() menuPageModel {
 	m.list.SetShowFilter(false)
 	m.list.SetShowPagination(false)
 	m.list.SetFilteringEnabled(false) // not necessary on this page...
+	m.list.KeyMap.Quit.Unbind()
 	return m
 }
 

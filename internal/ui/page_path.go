@@ -26,6 +26,7 @@ func newPathPageModel(doc *topi.Document) pathPageModel {
 	m.list.SetShowStatusBar(false)
 	m.list.SetShowFilter(false)
 	m.list.SetShowPagination(false)
+	m.list.KeyMap.Quit.Unbind()
 	return m
 }
 
