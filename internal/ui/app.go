@@ -10,8 +10,20 @@ import (
 
 var (
 	headerStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("65")).
-		Padding(0, 1)
+			Foreground(lipgloss.Color("65")).
+			Padding(0, 1)
+
+	footerStyle = lipgloss.NewStyle()
+
+	statusbarFileNameStyle = lipgloss.NewStyle().
+				Background(lipgloss.Color("65")).
+				Padding(0, 1)
+
+	statusbarSpaceColorStyle = lipgloss.NewStyle().
+					Background(lipgloss.Color("237"))
+
+	statusbarLowerStyle = lipgloss.NewStyle().
+				Padding(0, 1)
 )
 
 type page interface {
@@ -98,6 +110,8 @@ type model struct {
 	operationPage operationPageModel
 	helpPage      helpPageModel
 	aboutPage     aboutPageModel
+
+	width, height int
 }
 
 var _ tea.Model = (*model)(nil)
@@ -118,6 +132,13 @@ func newModel(doc *topi.Document) model {
 }
 
 func (m *model) SetSize(w, h int) {
+	m.width, m.height = w, h
+
+	t, r, b, l := baseStyle.GetMargin()
+	w = w - r - l
+	h = h - t - b
+	h = h - 3 // :(
+
 	m.menuPage.SetSize(w, h)
 	m.infoPage.SetSize(w, h)
 	m.tagPage.SetSize(w, h)
@@ -140,8 +161,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
-		t, r, b, l := baseStyle.GetMargin()
-		m.SetSize(msg.Width-l-r, msg.Height-t-b)
+		m.SetSize(msg.Width, msg.Height)
 	case selectInfoMenuMsg:
 		m.pushPage(infoPage{})
 	case selectTagMenuMsg:
@@ -187,7 +207,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	header := m.appHeader()
 	content := baseStyle.Render(m.content())
-	return header + content
+	footer := m.appFooter()
+	return lipgloss.JoinVertical(lipgloss.Top, header, content, footer)
 }
 
 func (m model) content() string {
@@ -214,6 +235,19 @@ func (m model) content() string {
 func (m model) appHeader() string {
 	bd := strings.Join(m.crumbs(), " > ")
 	return headerStyle.Render(bd)
+}
+
+func (m model) appFooter() string {
+	w := m.width
+	if w == 0 {
+		return ""
+	}
+	name := statusbarFileNameStyle.Render(m.doc.Meta.FileName)
+	spaces := strings.Repeat(" ", w-lipgloss.Width(name))
+	spaces = statusbarSpaceColorStyle.Render(spaces)
+	u := name + spaces
+	l := statusbarLowerStyle.Render("")
+	return footerStyle.Render(u + "\n" + l)
 }
 
 func Start(doc *topi.Document) error {

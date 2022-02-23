@@ -3,6 +3,7 @@ package openapi
 import (
 	"context"
 	"net/url"
+	"path"
 	"path/filepath"
 	"sort"
 
@@ -19,7 +20,7 @@ func Load(path string) (*topi.Document, error) {
 
 	if uri, err := url.ParseRequestURI(path); err == nil {
 		if doc, err := loader.LoadFromURI(uri); err == nil {
-			return convert(doc), nil
+			return convert(path, doc), nil
 		}
 	}
 
@@ -31,14 +32,22 @@ func Load(path string) (*topi.Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	return convert(doc), nil
+	return convert(fp, doc), nil
 }
 
-func convert(t *openapi3.T) *topi.Document {
+func convert(filepath string, t *openapi3.T) *topi.Document {
+	meta := convertMeta(filepath)
 	info := convertInfo(t.OpenAPI, t.Info, t.ExternalDocs)
 	paths := convertPaths(t.Paths)
 	tags := convertTags(t.Tags)
-	return topi.NewDocument(info, paths, tags)
+	return topi.NewDocument(meta, info, paths, tags)
+}
+
+func convertMeta(filepath string) *topi.Meta {
+	return &topi.Meta{
+		FileName: path.Base(filepath),
+		FullPath: filepath,
+	}
 }
 
 func convertInfo(openapi string, info *openapi3.Info, exDocs *openapi3.ExternalDocs) *topi.Info {

@@ -11,18 +11,20 @@ const (
 )
 
 type Document struct {
+	Meta       *Meta
 	Info       *Info
 	TagPathMap map[string][]*Path
 	Tags       []*Tag
 }
 
-func NewDocument(info *Info, tagPathMap map[string][]*Path, tags []*Tag) *Document {
+func NewDocument(meta *Meta, info *Info, tagPathMap map[string][]*Path, tags []*Tag) *Document {
 	for _, paths := range tagPathMap {
 		sortPaths(paths)
 	}
 	tags = mergeTags(tagPathMap, tags)
 	sortTags(tags)
 	return &Document{
+		Meta:       meta,
 		Info:       info,
 		TagPathMap: tagPathMap,
 		Tags:       tags,
@@ -78,6 +80,11 @@ func (d *Document) FindPathByOperationId(operationId string) *Path {
 		}
 	}
 	return nil
+}
+
+type Meta struct {
+	FileName string
+	FullPath string
 }
 
 type Info struct {
