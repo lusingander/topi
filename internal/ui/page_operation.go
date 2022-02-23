@@ -215,20 +215,26 @@ func (m *operationPageModel) updateContent() {
 		} else {
 			statusCode = operationPageSectionSubHeaderDefaultStatusCodeStyle.Render(response.StatusCode)
 		}
-		content.WriteString(operationPageItemStyle.Render(statusCode))
 
+		desc := ""
 		if response.Description != "" {
-			desc, _ := r.Render(response.Description)
-			desc = operationPageParameterItemsStyle.Render(desc)
-			content.WriteString(desc)
+			desc = response.Description // fixme: render as md, consider width
+		}
+		content.WriteString(operationPageItemStyle.Render(fmt.Sprintf("%s  %s", statusCode, desc)))
+
+		if len(response.Headers) > 0 {
+			requestHeadersHeader := operationPageSectionSubHeaderStyle.Render("Response headers")
+			content.WriteString(operationPageItemStyle.Render(requestHeadersHeader))
+			content.WriteString(operationPageParameterItemsStyle.Render(m.styledHeaders(response.Headers)))
 		}
 
 		for _, c := range response.Conetnt {
 			if c.Schema == nil {
 				continue
 			}
+			requestBodyMediaTypeHeader := operationPageSectionSubHeaderStyle.Render("Response schema")
 			requestBodyMediaType := opearationPageRequestBodyMediaTypeColorStyle.Render(fmt.Sprintf("[%s]", c.MediaType))
-			content.WriteString(operationPageItemStyle.Render(requestBodyMediaType))
+			content.WriteString(operationPageItemStyle.Render(fmt.Sprintf("%s  %s", requestBodyMediaTypeHeader, requestBodyMediaType)))
 			content.WriteString(operationPageParameterItemsStyle.Render(styledSchema(c.Schema, 1, true)))
 		}
 	}
@@ -250,6 +256,25 @@ func (operationPageModel) styledParams(params []*topi.Parameter) string {
 
 	for _, param := range params {
 		ss := styledSingleParam(param.Schema, param.Name, param.Description, param.Required, param.Deprecated, nameAreaWidth, 1)
+		strs = append(strs, ss...)
+	}
+	return strings.Join(strs, "\n")
+}
+
+func (operationPageModel) styledHeaders(headers []*topi.Header) string {
+	strs := make([]string, 0)
+
+	nameAreaWidth := 0
+	for _, header := range headers {
+		w := len(header.Name)
+		if nameAreaWidth < w {
+			nameAreaWidth = w
+		}
+	}
+	nameAreaWidth += 1 // requred marker
+
+	for _, header := range headers {
+		ss := styledSingleParam(header.Parameter.Schema, header.Name, header.Parameter.Description, header.Parameter.Required, header.Parameter.Deprecated, nameAreaWidth, 1)
 		strs = append(strs, ss...)
 	}
 	return strings.Join(strs, "\n")

@@ -246,11 +246,31 @@ func convertResponses(responses openapi3.Responses) []*topi.Response {
 			StatusCode:  status,
 			Description: *response.Value.Description, // required
 			Conetnt:     convertContent(response.Value.Content),
+			Headers:     convertHeaders(response.Value.Headers),
 		}
 		ret = append(ret, r)
 	}
 	// sort to fix order because openapi3.Responses is map
 	sort.Slice(ret, func(i, j int) bool { return ret[i].StatusCode < ret[j].StatusCode })
+	return ret
+}
+
+func convertHeaders(headers openapi3.Headers) []*topi.Header {
+	ret := make([]*topi.Header, 0)
+	for k, v := range headers {
+		p := &topi.Parameter{
+			// name/in must not be specified
+			Description: v.Value.Description,
+			Required:    v.Value.Required,
+			Deprecated:  v.Value.Deprecated,
+			Schema:      convertSchema(v.Value.Schema),
+		}
+		h := &topi.Header{
+			Name:      k,
+			Parameter: p,
+		}
+		ret = append(ret, h)
+	}
 	return ret
 }
 

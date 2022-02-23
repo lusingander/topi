@@ -209,6 +209,12 @@ type Response struct {
 	StatusCode  string
 	Description string
 	Conetnt     []*MediaTypeContent
+	Headers     []*Header
+}
+
+type Header struct {
+	Name      string
+	Parameter *Parameter
 }
 
 func (r *Response) Success() bool {
