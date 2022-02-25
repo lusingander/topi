@@ -57,9 +57,9 @@ type operationPage struct {
 
 func (p operationPage) crumb() string { return p.operationId } // fixme
 
-type helpPage struct{}
+type helpMenuPage struct{}
 
-func (helpPage) crumb() string { return "help" }
+func (helpMenuPage) crumb() string { return "help" }
 
 type aboutPage struct{}
 
@@ -112,7 +112,7 @@ type model struct {
 	tagPathsPage  tagPathsPageModel
 	pathPage      pathPageModel
 	operationPage operationPageModel
-	helpPage      helpPageModel
+	helpMenuPage  helpMenuPageModel
 	aboutPage     aboutPageModel
 
 	width, height int
@@ -131,7 +131,7 @@ func newModel(doc *topi.Document) model {
 		tagPathsPage:  newTagPathsPageModel(doc),
 		pathPage:      newPathPageModel(doc),
 		operationPage: newOperationPageModel(doc),
-		helpPage:      newHelpPageModel(),
+		helpMenuPage:  newHelpMenuPageModel(),
 		aboutPage:     newAboutPageModel(),
 	}
 }
@@ -150,7 +150,7 @@ func (m *model) SetSize(w, h int) {
 	m.tagPathsPage.SetSize(w, h)
 	m.pathPage.SetSize(w, h)
 	m.operationPage.SetSize(w, h)
-	m.helpPage.SetSize(w, h)
+	m.helpMenuPage.SetSize(w, h)
 	m.aboutPage.SetSize(w, h)
 }
 
@@ -175,7 +175,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case selectPathMenuMsg:
 		m.pushPage(pathPage{})
 	case selectHelpMenuMsg:
-		m.pushPage(helpPage{})
+		m.pushPage(helpMenuPage{})
 	case selectAboutMenuMsg:
 		m.pushPage(aboutPage{})
 	case selectTagMsg:
@@ -204,8 +204,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case operationPage:
 		m.operationPage, cmd = m.operationPage.Update(msg)
 		return m, cmd
-	case helpPage:
-		m.helpPage, cmd = m.helpPage.Update(msg)
+	case helpMenuPage:
+		m.helpMenuPage, cmd = m.helpMenuPage.Update(msg)
 		return m, cmd
 	case aboutPage:
 		m.aboutPage, cmd = m.aboutPage.Update(msg)
@@ -236,8 +236,8 @@ func (m model) content() string {
 		return m.pathPage.View()
 	case operationPage:
 		return m.operationPage.View()
-	case helpPage:
-		return m.helpPage.View()
+	case helpMenuPage:
+		return m.helpMenuPage.View()
 	case aboutPage:
 		return m.aboutPage.View()
 	default:
@@ -279,7 +279,7 @@ func (m model) statusbarInfoString() string {
 		return m.pathPage.statusbarInfoString()
 	case operationPage:
 		return ""
-	case helpPage:
+	case helpMenuPage:
 		return ""
 	case aboutPage:
 		return ""
@@ -302,7 +302,7 @@ func (m model) statusMessageString() string {
 		return m.pathPage.statusMessageString()
 	case operationPage:
 		return ""
-	case helpPage:
+	case helpMenuPage:
 		return ""
 	case aboutPage:
 		return ""

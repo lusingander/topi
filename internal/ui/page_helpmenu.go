@@ -7,27 +7,27 @@ import (
 )
 
 const (
-	helpPageAboutMenu = "About"
+	helpMenuPageAboutMenu = "About"
 )
 
-var helpPageItems = []list.Item{
-	helpPageListItem{
-		title:       helpPageAboutMenu,
+var helpMenuPageItems = []list.Item{
+	helpMenuPageListItem{
+		title:       helpMenuPageAboutMenu,
 		description: "Show about this application",
 	},
 }
 
-type helpPageModel struct {
+type helpMenuPageModel struct {
 	list          list.Model
-	delegateKeys  helpPageDelegateKeyMap
+	delegateKeys  helpMenuPageDelegateKeyMap
 	width, height int
 }
 
-func newHelpPageModel() helpPageModel {
-	m := helpPageModel{}
-	m.delegateKeys = newHelpPageDelegateKeyMap()
-	delegate := newHelpPageListDelegate()
-	m.list = list.New(helpPageItems, delegate, 0, 0)
+func newHelpMenuPageModel() helpMenuPageModel {
+	m := helpMenuPageModel{}
+	m.delegateKeys = newHelpMenuPageDelegateKeyMap()
+	delegate := newHelpMenuPageListDelegate()
+	m.list = list.New(helpMenuPageItems, delegate, 0, 0)
 	m.list.SetShowTitle(false)
 	m.list.SetShowHelp(false)
 	m.list.SetShowStatusBar(false)
@@ -38,13 +38,13 @@ func newHelpPageModel() helpPageModel {
 	return m
 }
 
-type helpPageDelegateKeyMap struct {
+type helpMenuPageDelegateKeyMap struct {
 	back  key.Binding
 	enter key.Binding
 }
 
-func newHelpPageDelegateKeyMap() helpPageDelegateKeyMap {
-	return helpPageDelegateKeyMap{
+func newHelpMenuPageDelegateKeyMap() helpMenuPageDelegateKeyMap {
+	return helpMenuPageDelegateKeyMap{
 		back: key.NewBinding(
 			key.WithKeys("backspace", "ctrl+h"),
 			key.WithHelp("backspace", "back"),
@@ -56,23 +56,23 @@ func newHelpPageDelegateKeyMap() helpPageDelegateKeyMap {
 	}
 }
 
-func (m *helpPageModel) SetSize(w, h int) {
+func (m *helpMenuPageModel) SetSize(w, h int) {
 	m.width, m.height = w, h
 	m.list.SetSize(w, h)
 }
 
-func (m helpPageModel) Init() tea.Cmd {
+func (m helpMenuPageModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m helpPageModel) Update(msg tea.Msg) (helpPageModel, tea.Cmd) {
+func (m helpMenuPageModel) Update(msg tea.Msg) (helpMenuPageModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.delegateKeys.enter):
-			menu := m.list.SelectedItem().(helpPageListItem)
+			menu := m.list.SelectedItem().(helpMenuPageListItem)
 			switch menu.title {
-			case helpPageAboutMenu:
+			case helpMenuPageAboutMenu:
 				return m, selectAboutMenu
 			}
 			return m, nil
@@ -85,6 +85,6 @@ func (m helpPageModel) Update(msg tea.Msg) (helpPageModel, tea.Cmd) {
 	return m, cmd
 }
 
-func (m helpPageModel) View() string {
+func (m helpMenuPageModel) View() string {
 	return m.list.View()
 }
