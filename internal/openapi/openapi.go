@@ -40,7 +40,8 @@ func convert(filepath string, t *openapi3.T) *topi.Document {
 	info := convertInfo(t.OpenAPI, t.Info, t.ExternalDocs)
 	paths := convertPaths(t.Paths)
 	tags := convertTags(t.Tags)
-	return topi.NewDocument(meta, info, paths, tags)
+	components := convertComponents(&t.Components)
+	return topi.NewDocument(meta, info, paths, tags, components)
 }
 
 func convertMeta(filepath string) *topi.Meta {
@@ -145,6 +146,7 @@ func convertOperation(pathItem *openapi3.PathItem, op *openapi3.Operation, metho
 		CookieParameters: convertParameters(params, "cookie"),
 		RequestBody:      convertRequestBody(op.RequestBody),
 		Responses:        convertResponses(op.Responses),
+		Security:         convertSecurityRequirements(op.Security),
 	}
 	return ret
 }
@@ -291,6 +293,88 @@ func convertTags(tags openapi3.Tags) []*topi.Tag {
 			Description: tag.Description,
 		}
 		ret = append(ret, t)
+	}
+	return ret
+}
+
+func convertSecurityRequirements(rs *openapi3.SecurityRequirements) []*topi.SecurityRequirement {
+	if rs == nil {
+		return nil
+	}
+	ret := make([]*topi.SecurityRequirement, 0)
+	for _, r := range *rs {
+		req := &topi.SecurityRequirement{
+			Schemes: make([]*topi.SecurityRequirementScheme, 0),
+		}
+		for k, v := range r {
+			s := &topi.SecurityRequirementScheme{
+				Key:    k,
+				Scopes: v,
+			}
+			req.Schemes = append(req.Schemes, s)
+		}
+		ret = append(ret, req)
+	}
+	return ret
+}
+
+func convertComponents(components *openapi3.Components) *topi.Components {
+	return &topi.Components{
+		SecuritySchemes: convertSecuritySchemes(components.SecuritySchemes),
+	}
+}
+
+func convertSecuritySchemes(schemes openapi3.SecuritySchemes) []*topi.SecurityScheme {
+	ret := make([]*topi.SecurityScheme, 0)
+	for k, v := range schemes {
+		s := &topi.SecurityScheme{
+			Key:              k,
+			Type:             v.Value.Type,
+			Description:      v.Value.Description,
+			Name:             v.Value.Name,
+			In:               v.Value.In,
+			Scheme:           v.Value.Scheme,
+			BearerFormat:     v.Value.BearerFormat,
+			OpenIdConnectUrl: v.Value.OpenIdConnectUrl,
+			OAtuhFlows:       convertOAuthFlows(v.Value.Flows),
+		}
+		ret = append(ret, s)
+	}
+	return ret
+}
+
+func convertOAuthFlows(flows *openapi3.OAuthFlows) *topi.OAtuhFlows {
+	if flows == nil {
+		return nil
+	}
+	return &topi.OAtuhFlows{
+		ImplicitFlow:                         convertOAtuhFlow(flows.Implicit),
+		ResourceOwnerPasswordCredentialsFlow: convertOAtuhFlow(flows.Password),
+		ClientCredentialsFlow:                convertOAtuhFlow(flows.ClientCredentials),
+		AuthorizatonCodeFlow:                 convertOAtuhFlow(flows.AuthorizationCode),
+	}
+}
+
+func convertOAtuhFlow(flow *openapi3.OAuthFlow) *topi.OAuthFlow {
+	if flow == nil {
+		return nil
+	}
+	return &topi.OAuthFlow{
+		AuthorizationURL: flow.AuthorizationURL,
+		TokenURL:         flow.TokenURL,
+		RefreshURL:       flow.RefreshURL,
+		Scopes:           convertScopes(flow.Scopes),
+	}
+}
+
+func convertScopes(scopes map[string]string) []*topi.Scope {
+	ret := make([]*topi.Scope, 0)
+	for k, v := range scopes {
+		s := &topi.Scope{
+			Name:   k,
+			Detail: v,
+		}
+		ret = append(ret, s)
 	}
 	return ret
 }

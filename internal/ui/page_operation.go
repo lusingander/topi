@@ -78,6 +78,10 @@ var (
 	operationPageSectionSubHeaderDefaultStatusCodeStyle = operationPageSectionSubHeaderStyle.Copy().
 								Foreground(lipgloss.Color("32"))
 
+	operationPageSecuritySchemeScopeStyle = lipgloss.NewStyle().
+						Foreground(lipgloss.Color("203")).
+						Background(lipgloss.Color("236"))
+
 	operationPageItemStyle = lipgloss.NewStyle().
 				Padding(1, 2)
 )
@@ -167,6 +171,14 @@ func (m *operationPageModel) updateContent() {
 		content.WriteString(operationPageSeparator)
 	}
 
+	if len(op.Security) > 0 {
+		requestSectionHeader := operationPageSectionHeaderStyle.Render("Security Requirements")
+		content.WriteString(operationPageItemStyle.Render(requestSectionHeader))
+
+		rs := styledSecurityRequirements(op.Security)
+		content.WriteString(operationPageParameterItemsStyle.Render(rs))
+	}
+
 	requestSectionHeader := operationPageSectionHeaderStyle.Render("Request")
 	content.WriteString(operationPageItemStyle.Render(requestSectionHeader))
 
@@ -240,6 +252,30 @@ func (m *operationPageModel) updateContent() {
 	}
 
 	m.viewport.SetContent(content.String())
+}
+
+func styledSecurityRequirements(requirements []*topi.SecurityRequirement) string {
+	ss := make([]string, len(requirements))
+	for i, requirement := range requirements {
+		schemes := make([]string, len(requirement.Schemes))
+		for j, scheme := range requirement.Schemes {
+			schemes[j] = styledSecurityScheme(scheme)
+		}
+		ss[i] = strings.Join(schemes, " + ")
+	}
+	return strings.Join(ss, "\n or\n")
+}
+
+func styledSecurityScheme(sc *topi.SecurityRequirementScheme) string {
+	s := sc.Key
+	if len(sc.Scopes) > 0 {
+		scopes := make([]string, len(sc.Scopes))
+		for i, scope := range sc.Scopes {
+			scopes[i] = operationPageSecuritySchemeScopeStyle.Render(scope)
+		}
+		s += fmt.Sprintf(" (%s)", strings.Join(scopes, ", "))
+	}
+	return s
 }
 
 func (operationPageModel) styledParams(params []*topi.Parameter) string {

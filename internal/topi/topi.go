@@ -15,9 +15,10 @@ type Document struct {
 	Info       *Info
 	TagPathMap map[string][]*Path
 	Tags       []*Tag
+	Components *Components
 }
 
-func NewDocument(meta *Meta, info *Info, tagPathMap map[string][]*Path, tags []*Tag) *Document {
+func NewDocument(meta *Meta, info *Info, tagPathMap map[string][]*Path, tags []*Tag, components *Components) *Document {
 	for _, paths := range tagPathMap {
 		sortPaths(paths)
 	}
@@ -28,6 +29,7 @@ func NewDocument(meta *Meta, info *Info, tagPathMap map[string][]*Path, tags []*
 		Info:       info,
 		TagPathMap: tagPathMap,
 		Tags:       tags,
+		Components: components,
 	}
 }
 
@@ -115,6 +117,7 @@ type Path struct {
 	CookieParameters []*Parameter
 	RequestBody      *RequestBody
 	Responses        []*Response
+	Security         []*SecurityRequirement
 }
 
 func comparePath(p1, p2 *Path) bool {
@@ -235,4 +238,52 @@ func (r *Response) Error() bool {
 type Tag struct {
 	Name        string
 	Description string
+}
+
+type SecurityRequirement struct {
+	Schemes []*SecurityRequirementScheme
+}
+
+type SecurityRequirementScheme struct {
+	Key    string
+	Scopes []string
+}
+
+type Components struct {
+	SecuritySchemes []*SecurityScheme
+}
+
+type SecurityScheme struct {
+	Key         string
+	Type        string
+	Description string
+
+	Name string // api_key
+	In   string // api_key
+
+	Scheme       string // http
+	BearerFormat string // http
+
+	OpenIdConnectUrl string // openIdConnect
+
+	OAtuhFlows *OAtuhFlows // oauth2
+}
+
+type OAtuhFlows struct {
+	ImplicitFlow                         *OAuthFlow
+	ResourceOwnerPasswordCredentialsFlow *OAuthFlow
+	ClientCredentialsFlow                *OAuthFlow
+	AuthorizatonCodeFlow                 *OAuthFlow
+}
+
+type OAuthFlow struct {
+	AuthorizationURL string
+	TokenURL         string
+	RefreshURL       string
+	Scopes           []*Scope
+}
+
+type Scope struct {
+	Name   string
+	Detail string
 }
