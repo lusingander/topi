@@ -266,7 +266,22 @@ type SecurityScheme struct {
 
 	OpenIdConnectUrl string // openIdConnect
 
-	OAtuhFlows *OAtuhFlows // oauth2
+	OAuthFlows *OAtuhFlows // oauth2
+}
+
+func (s *SecurityScheme) TypeStr() string {
+	switch s.Type {
+	case "apiKey":
+		return "API Key"
+	case "http":
+		return "HTTP"
+	case "oauth2":
+		return "OAuth2"
+	case "openIdConnect":
+		return "OpenID Connect"
+	default:
+		return ""
+	}
 }
 
 type OAtuhFlows struct {

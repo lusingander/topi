@@ -33,8 +33,47 @@ var (
 					Background(lipgloss.Color("250")).
 					Foreground(lipgloss.Color("56"))
 
+	infoPageSectionHeaderStyle = lipgloss.NewStyle().
+					Foreground(lipgloss.Color("70")).
+					Underline(true)
+
+	infoPageSectionSubHeaderStyle = infoPageSectionHeaderStyle.Copy().
+					Margin(0, 0, 0, 1)
+
+	infoPageAuthenticationItemStyle = infoPageItemStyle.Copy().
+					Margin(0, 0, 0, 2)
+
+	infoPageAuthenticationItemDescriptionStyle = infoPageAuthenticationItemStyle.Copy().
+							PaddingBottom(0)
+
+	infoPageAuthenticationItemKeyColorStyle = lipgloss.NewStyle().
+						Foreground(lipgloss.Color("143"))
+
+	infoPageAuthenticationItemValueColorStyle = lipgloss.NewStyle().
+							Foreground(lipgloss.Color("167"))
+
+	infoPageAuthenticationOAuthFlowStyle = lipgloss.NewStyle().
+						Foreground(lipgloss.Color("70"))
+
+	infoPageAuthenticationOAuthScopesStyle = lipgloss.NewStyle().
+						MarginLeft(2)
+
+	infoPageAuthenticationOAuthScopeNameColorStyle = lipgloss.NewStyle().
+							Foreground(lipgloss.Color("167")).
+							Underline(true)
+
+	infoPageAuthenticationOAuthScopeDescColorStyle = lipgloss.NewStyle().
+							Foreground(lipgloss.Color("246"))
+
 	infoPageItemStyle = lipgloss.NewStyle().
 				Padding(1, 2)
+)
+
+var (
+	infoPageSeparator = lipgloss.NewStyle().
+		Foreground(lipgloss.Color("240")).
+		Padding(1, 2).
+		Render("----------")
 )
 
 type infoPageSelectableItems int
@@ -190,10 +229,137 @@ func (m *infoPageModel) updateContent() {
 		content.WriteString(infoPageItemStyle.Render(url))
 	}
 
+	if m.doc.Components != nil {
+		schemes := m.doc.Components.SecuritySchemes
+		if len(schemes) > 0 {
+			h := infoPageSectionHeaderStyle.Render("Authentication")
+			content.WriteString(infoPageItemStyle.Render(h))
+
+			for _, scheme := range schemes {
+				h := infoPageSectionSubHeaderStyle.Render(fmt.Sprintf("%s (%s)", scheme.Key, scheme.TypeStr()))
+				content.WriteString(infoPageItemStyle.Render(h))
+
+				if scheme.Description != "" {
+					desc, _ := r.Render(scheme.Description)
+					desc = infoPageAuthenticationItemDescriptionStyle.Render(desc)
+					content.WriteString(desc)
+				}
+
+				switch scheme.Type {
+				case "apiKey":
+					nameKey := infoPageAuthenticationItemKeyColorStyle.Render("Parameter name:")
+					nameValue := infoPageAuthenticationItemValueColorStyle.Render(scheme.Name)
+					inKey := infoPageAuthenticationItemKeyColorStyle.Render("Parameter in:")
+					inValue := infoPageAuthenticationItemValueColorStyle.Render(scheme.In)
+					values := fmt.Sprintf("%s %s\n%s %s", nameKey, nameValue, inKey, inValue)
+					content.WriteString(infoPageAuthenticationItemStyle.Render(values))
+				case "http":
+					schemeKey := infoPageAuthenticationItemKeyColorStyle.Render("HTTP Authorization Scheme:")
+					schemeValue := infoPageAuthenticationItemValueColorStyle.Render(scheme.Scheme)
+					values := fmt.Sprintf("%s %s", schemeKey, schemeValue)
+					if scheme.BearerFormat != "" {
+						formatKey := infoPageAuthenticationItemKeyColorStyle.Render("Bearer format:")
+						formatValue := infoPageAuthenticationItemValueColorStyle.Render(scheme.BearerFormat)
+						values += fmt.Sprintf("\n%s %s", formatKey, formatValue)
+					}
+					content.WriteString(infoPageAuthenticationItemStyle.Render(values))
+				case "oauth2":
+					if scheme.OAuthFlows.AuthorizatonCodeFlow != nil {
+						f := scheme.OAuthFlows.AuthorizatonCodeFlow
+						flow := infoPageAuthenticationOAuthFlowStyle.Render("[Authorization Code Flow]")
+						content.WriteString(infoPageAuthenticationItemStyle.Render(flow))
+						authKey := infoPageAuthenticationItemKeyColorStyle.Render("Authorization URL:")
+						authValue := infoPageAuthenticationItemValueColorStyle.Render(f.AuthorizationURL)
+						tokenKey := infoPageAuthenticationItemKeyColorStyle.Render("Token URL:")
+						tokenValue := infoPageAuthenticationItemValueColorStyle.Render(f.TokenURL)
+						values := fmt.Sprintf("%s %s\n%s %s", authKey, authValue, tokenKey, tokenValue)
+						if f.RefreshURL != "" {
+							refKey := infoPageAuthenticationItemKeyColorStyle.Render("Reflesh URL:")
+							refValue := infoPageAuthenticationItemValueColorStyle.Render(f.RefreshURL)
+							values += fmt.Sprintf("\n%s %s", refKey, refValue)
+						}
+						scopesKey := infoPageAuthenticationItemKeyColorStyle.Render("Scopes:")
+						scopesValue := infoPageAuthenticationOAuthScopesStyle.Render(styledOAuthScopes(f.Scopes))
+						values += fmt.Sprintf("\n%s\n%s", scopesKey, scopesValue)
+						content.WriteString(infoPageAuthenticationItemStyle.Render(values))
+					}
+					if scheme.OAuthFlows.ImplicitFlow != nil {
+						f := scheme.OAuthFlows.ImplicitFlow
+						flow := infoPageAuthenticationOAuthFlowStyle.Render("[Implicit Flow]")
+						content.WriteString(infoPageAuthenticationItemStyle.Render(flow))
+						authKey := infoPageAuthenticationItemKeyColorStyle.Render("Authorization URL:")
+						authValue := infoPageAuthenticationItemValueColorStyle.Render(f.AuthorizationURL)
+						values := fmt.Sprintf("%s %s", authKey, authValue)
+						if f.RefreshURL != "" {
+							refKey := infoPageAuthenticationItemKeyColorStyle.Render("Reflesh URL:")
+							refValue := infoPageAuthenticationItemValueColorStyle.Render(f.RefreshURL)
+							values += fmt.Sprintf("\n%s %s", refKey, refValue)
+						}
+						scopesKey := infoPageAuthenticationItemKeyColorStyle.Render("Scopes:")
+						scopesValue := infoPageAuthenticationOAuthScopesStyle.Render(styledOAuthScopes(f.Scopes))
+						values += fmt.Sprintf("\n%s\n%s", scopesKey, scopesValue)
+						content.WriteString(infoPageAuthenticationItemStyle.Render(values))
+					}
+					if scheme.OAuthFlows.ResourceOwnerPasswordCredentialsFlow != nil {
+						f := scheme.OAuthFlows.ResourceOwnerPasswordCredentialsFlow
+						flow := infoPageAuthenticationOAuthFlowStyle.Render("[Resource Owner Password Credentials Flow]")
+						content.WriteString(infoPageAuthenticationItemStyle.Render(flow))
+						tokenKey := infoPageAuthenticationItemKeyColorStyle.Render("Token URL:")
+						tokenValue := infoPageAuthenticationItemValueColorStyle.Render(f.TokenURL)
+						values := fmt.Sprintf("%s %s", tokenKey, tokenValue)
+						if f.RefreshURL != "" {
+							refKey := infoPageAuthenticationItemKeyColorStyle.Render("Reflesh URL:")
+							refValue := infoPageAuthenticationItemValueColorStyle.Render(f.RefreshURL)
+							values += fmt.Sprintf("\n%s %s", refKey, refValue)
+						}
+						scopesKey := infoPageAuthenticationItemKeyColorStyle.Render("Scopes:")
+						scopesValue := infoPageAuthenticationOAuthScopesStyle.Render(styledOAuthScopes(f.Scopes))
+						values += fmt.Sprintf("\n%s\n%s", scopesKey, scopesValue)
+						content.WriteString(infoPageAuthenticationItemStyle.Render(values))
+					}
+					if scheme.OAuthFlows.ClientCredentialsFlow != nil {
+						f := scheme.OAuthFlows.ClientCredentialsFlow
+						flow := infoPageAuthenticationOAuthFlowStyle.Render("[Client Credentials Flow]")
+						content.WriteString(infoPageAuthenticationItemStyle.Render(flow))
+						tokenKey := infoPageAuthenticationItemKeyColorStyle.Render("Token URL:")
+						tokenValue := infoPageAuthenticationItemValueColorStyle.Render(f.TokenURL)
+						values := fmt.Sprintf("%s %s", tokenKey, tokenValue)
+						if f.RefreshURL != "" {
+							refKey := infoPageAuthenticationItemKeyColorStyle.Render("Reflesh URL:")
+							refValue := infoPageAuthenticationItemValueColorStyle.Render(f.RefreshURL)
+							values += fmt.Sprintf("\n%s %s", refKey, refValue)
+						}
+						scopesKey := infoPageAuthenticationItemKeyColorStyle.Render("Scopes:")
+						scopesValue := infoPageAuthenticationOAuthScopesStyle.Render(styledOAuthScopes(f.Scopes))
+						values += fmt.Sprintf("\n%s\n%s", scopesKey, scopesValue)
+						content.WriteString(infoPageAuthenticationItemStyle.Render(values))
+					}
+				case "openIdConnect":
+					urlKey := infoPageAuthenticationItemKeyColorStyle.Render("Connect URL:")
+					urlValue := infoPageAuthenticationItemValueColorStyle.Render(scheme.OpenIdConnectUrl)
+					values := fmt.Sprintf("%s %s", urlKey, urlValue)
+					content.WriteString(infoPageAuthenticationItemStyle.Render(values))
+				}
+			}
+		}
+	}
+
+	content.WriteString(infoPageSeparator)
+
 	openAPIVersion := infoPageVersionStyle.Render(fmt.Sprintf("OpenAPI Version: %s", info.OpenAPIVersion))
 	content.WriteString(infoPageItemStyle.Render(openAPIVersion))
 
 	m.viewport.SetContent(content.String())
+}
+
+func styledOAuthScopes(scopes []*topi.Scope) string {
+	ss := make([]string, len(scopes))
+	for i, scope := range scopes {
+		scopeName := infoPageAuthenticationOAuthScopeNameColorStyle.Render(scope.Name)
+		scopeDesc := infoPageAuthenticationOAuthScopeDescColorStyle.Render(scope.Detail) // fixme: render as md, consider width
+		ss[i] = fmt.Sprintf("%s - %s", scopeName, scopeDesc)
+	}
+	return strings.Join(ss, "\n")
 }
 
 func (m *infoPageModel) selectItem(reverse bool) {

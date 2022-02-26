@@ -298,6 +298,7 @@ func convertTags(tags openapi3.Tags) []*topi.Tag {
 }
 
 func convertSecurityRequirements(rs *openapi3.SecurityRequirements) []*topi.SecurityRequirement {
+	// fixme: use instead if OpenAPI Object has Security Requirement Object
 	if rs == nil {
 		return nil
 	}
@@ -336,7 +337,7 @@ func convertSecuritySchemes(schemes openapi3.SecuritySchemes) []*topi.SecuritySc
 			Scheme:           v.Value.Scheme,
 			BearerFormat:     v.Value.BearerFormat,
 			OpenIdConnectUrl: v.Value.OpenIdConnectUrl,
-			OAtuhFlows:       convertOAuthFlows(v.Value.Flows),
+			OAuthFlows:       convertOAuthFlows(v.Value.Flows),
 		}
 		ret = append(ret, s)
 	}
