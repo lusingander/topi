@@ -357,6 +357,11 @@ func styledSchema(sc *topi.Schema, indentLevel int, read bool) string {
 		}
 		return strings.Join(strs, "\n")
 	}
+	if sc.Type == "array" && sc.Items.Type == "object" {
+		s := schemaTypeString(sc)
+		t := styledSchema(sc.Items, indentLevel+1, read)
+		return strings.Join([]string{s, t}, "\n")
+	}
 	return schemaTypeString(sc)
 }
 
