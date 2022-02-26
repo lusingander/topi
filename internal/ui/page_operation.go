@@ -82,6 +82,9 @@ var (
 						Foreground(lipgloss.Color("203")).
 						Background(lipgloss.Color("236"))
 
+	operationPageSchemaIndentColorStyle = lipgloss.NewStyle().
+						Foreground(lipgloss.Color("238"))
+
 	operationPageItemStyle = lipgloss.NewStyle().
 				Padding(1, 2)
 )
@@ -211,7 +214,7 @@ func (m *operationPageModel) updateContent() {
 			requestBodyMediaType := opearationPageRequestBodyMediaTypeColorStyle.Render(fmt.Sprintf("[%s]", c.MediaType))
 			requestBodySectionHeader := operationPageSectionSubHeaderStyle.Render("Request body")
 			content.WriteString(operationPageItemStyle.Render(fmt.Sprintf("%s  %s", requestBodySectionHeader, requestBodyMediaType)))
-			content.WriteString(operationPageParameterItemsStyle.Render(styledSchema(c.Schema, 1, false)))
+			content.WriteString(operationPageParameterItemsStyle.Render(styledSchema(c.Schema, 0, false)))
 		}
 	}
 
@@ -247,7 +250,7 @@ func (m *operationPageModel) updateContent() {
 			requestBodyMediaTypeHeader := operationPageSectionSubHeaderStyle.Render("Response schema")
 			requestBodyMediaType := opearationPageRequestBodyMediaTypeColorStyle.Render(fmt.Sprintf("[%s]", c.MediaType))
 			content.WriteString(operationPageItemStyle.Render(fmt.Sprintf("%s  %s", requestBodyMediaTypeHeader, requestBodyMediaType)))
-			content.WriteString(operationPageParameterItemsStyle.Render(styledSchema(c.Schema, 1, true)))
+			content.WriteString(operationPageParameterItemsStyle.Render(styledSchema(c.Schema, 0, true)))
 		}
 	}
 
@@ -288,10 +291,10 @@ func (operationPageModel) styledParams(params []*topi.Parameter) string {
 			nameAreaWidth = w
 		}
 	}
-	nameAreaWidth += 1 // requred marker
+	nameAreaWidth += 2 // requred marker + buf
 
 	for _, param := range params {
-		ss := styledSingleParam(param.Schema, param.Name, param.Description, param.Required, param.Deprecated, nameAreaWidth, 1)
+		ss := styledSingleParam(param.Schema, param.Name, param.Description, param.Required, param.Deprecated, nameAreaWidth, 0)
 		strs = append(strs, ss...)
 	}
 	return strings.Join(strs, "\n")
@@ -307,10 +310,10 @@ func (operationPageModel) styledHeaders(headers []*topi.Header) string {
 			nameAreaWidth = w
 		}
 	}
-	nameAreaWidth += 1 // requred marker
+	nameAreaWidth += 2 // requred marker + buf
 
 	for _, header := range headers {
-		ss := styledSingleParam(header.Parameter.Schema, header.Name, header.Parameter.Description, header.Parameter.Required, header.Parameter.Deprecated, nameAreaWidth, 1)
+		ss := styledSingleParam(header.Parameter.Schema, header.Name, header.Parameter.Description, header.Parameter.Required, header.Parameter.Deprecated, nameAreaWidth, 0)
 		strs = append(strs, ss...)
 	}
 	return strings.Join(strs, "\n")
@@ -326,7 +329,7 @@ func styledSchema(sc *topi.Schema, indentLevel int, read bool) string {
 				nameAreaWidth = w
 			}
 		}
-		nameAreaWidth += 1 // requred marker
+		nameAreaWidth += 2 // requred marker + buf
 
 		strs := make([]string, 0)
 		for name, prop := range sc.Properties { // fixme: fix order
@@ -342,19 +345,70 @@ func styledSchema(sc *topi.Schema, indentLevel int, read bool) string {
 			required := containsString(name, sc.Required)
 			ss := styledSingleParam(prop, name, prop.Description, required, prop.Deprecated, nameAreaWidth, indentLevel)
 			strs = append(strs, ss...)
+
+			if prop.Type == "object" {
+				ss := styledProperties(prop, indentLevel+1, read)
+				strs = append(strs, ss...)
+			}
+			if prop.Type == "array" && prop.Items.Type == "object" {
+				ss := styledProperties(prop.Items, indentLevel+1, read)
+				strs = append(strs, ss...)
+			}
 		}
 		return strings.Join(strs, "\n")
 	}
 	return schemaTypeString(sc)
 }
 
+func styledProperties(sc *topi.Schema, indentLevel int, read bool) []string {
+	strs := make([]string, 0)
+	props := sc.Properties
+
+	nameAreaWidth := 0
+	for name := range props {
+		w := len(name)
+		if nameAreaWidth < w {
+			nameAreaWidth = w
+		}
+	}
+	nameAreaWidth += 2 // requred marker + buf
+
+	for name, prop := range props { // fixme: fix order
+		if read {
+			if prop.WriteOnly {
+				continue
+			}
+		} else {
+			if prop.ReadOnly {
+				continue
+			}
+		}
+		required := containsString(name, sc.Required)
+		ss := styledSingleParam(prop, name, prop.Description, required, prop.Deprecated, nameAreaWidth, indentLevel)
+		strs = append(strs, ss...)
+
+		if prop.Type == "object" {
+			ss := styledProperties(prop, indentLevel+1, read)
+			strs = append(strs, ss...)
+		}
+		if prop.Type == "array" && prop.Items.Type == "object" {
+			ss := styledProperties(prop.Items, indentLevel+1, read)
+			strs = append(strs, ss...)
+		}
+	}
+
+	return strs
+}
+
 func styledSingleParam(schema *topi.Schema, name, description string, required, deprecated bool, nameAreaWidth, indentLevel int) []string {
 	strs := make([]string, 0)
 
-	schemaIndent := strings.Repeat("  ", indentLevel)
+	schemaIndent := strings.Repeat(">>", indentLevel)
 	descIndent := strings.Repeat(" ", nameAreaWidth+len(schemaIndent))
 
 	var s strings.Builder
+
+	s.WriteString(operationPageSchemaIndentColorStyle.Render(schemaIndent))
 
 	if deprecated {
 		name = operationPageParameterDeprecatedNameStyle.Render(name)
@@ -366,7 +420,6 @@ func styledSingleParam(schema *topi.Schema, name, description string, required, 
 
 	if schema != nil {
 		schemaType := schemaTypeString(schema)
-		s.WriteString(schemaIndent)
 		s.WriteString(operationPageParameterTypeColorStyle.Render(schemaType))
 	}
 
