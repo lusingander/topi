@@ -46,7 +46,7 @@ var (
 		},
 		Heading: ansi.StyleBlock{
 			StylePrimitive: ansi.StylePrimitive{
-				BlockSuffix: "",
+				BlockSuffix: "\n",
 				Color:       stringPtr("70"),
 			},
 		},

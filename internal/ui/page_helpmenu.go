@@ -7,10 +7,15 @@ import (
 )
 
 const (
+	helpMenuPageHelpMenu  = "Help"
 	helpMenuPageAboutMenu = "About"
 )
 
 var helpMenuPageItems = []list.Item{
+	helpMenuPageListItem{
+		title:       helpMenuPageHelpMenu,
+		description: "Show help",
+	},
 	helpMenuPageListItem{
 		title:       helpMenuPageAboutMenu,
 		description: "Show about this application",
@@ -72,6 +77,8 @@ func (m helpMenuPageModel) Update(msg tea.Msg) (helpMenuPageModel, tea.Cmd) {
 		case key.Matches(msg, m.delegateKeys.enter):
 			menu := m.list.SelectedItem().(helpMenuPageListItem)
 			switch menu.title {
+			case helpMenuPageHelpMenu:
+				return m, selectHelpHelpMenu
 			case helpMenuPageAboutMenu:
 				return m, selectAboutMenu
 			}

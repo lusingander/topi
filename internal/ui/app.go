@@ -61,6 +61,10 @@ type helpMenuPage struct{}
 
 func (helpMenuPage) crumb() string { return "help" }
 
+type helpPage struct{}
+
+func (helpPage) crumb() string { return "help" }
+
 type aboutPage struct{}
 
 func (aboutPage) crumb() string { return "about" }
@@ -113,6 +117,7 @@ type model struct {
 	pathPage      pathPageModel
 	operationPage operationPageModel
 	helpMenuPage  helpMenuPageModel
+	helpPage      helpPageModel
 	aboutPage     aboutPageModel
 
 	width, height int
@@ -132,6 +137,7 @@ func newModel(doc *topi.Document) model {
 		pathPage:      newPathPageModel(doc),
 		operationPage: newOperationPageModel(doc),
 		helpMenuPage:  newHelpMenuPageModel(),
+		helpPage:      newHelpPageModel(),
 		aboutPage:     newAboutPageModel(),
 	}
 }
@@ -151,7 +157,17 @@ func (m *model) SetSize(w, h int) {
 	m.pathPage.SetSize(w, h)
 	m.operationPage.SetSize(w, h)
 	m.helpMenuPage.SetSize(w, h)
+	m.helpPage.SetSize(w, h)
 	m.aboutPage.SetSize(w, h)
+}
+
+func (m *model) toggleHelp() {
+	switch m.currentPage().(type) {
+	case helpPage:
+		m.popPage()
+	default:
+		m.pushPage(helpPage{})
+	}
 }
 
 func (m model) Init() tea.Cmd {
@@ -165,9 +181,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
+		case "?":
+			return m, toggleHelp
 		}
 	case tea.WindowSizeMsg:
 		m.SetSize(msg.Width, msg.Height)
+	case toggleHelpMsg:
+		m.toggleHelp()
 	case selectInfoMenuMsg:
 		m.pushPage(infoPage{})
 	case selectTagMenuMsg:
@@ -176,6 +196,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.pushPage(pathPage{})
 	case selectHelpMenuMsg:
 		m.pushPage(helpMenuPage{})
+	case selectHelpHelpMenuMsg:
+		m.pushPage(helpPage{})
 	case selectAboutMenuMsg:
 		m.pushPage(aboutPage{})
 	case selectTagMsg:
@@ -206,6 +228,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	case helpMenuPage:
 		m.helpMenuPage, cmd = m.helpMenuPage.Update(msg)
+		return m, cmd
+	case helpPage:
+		m.helpPage, cmd = m.helpPage.Update(msg)
 		return m, cmd
 	case aboutPage:
 		m.aboutPage, cmd = m.aboutPage.Update(msg)
@@ -238,6 +263,8 @@ func (m model) content() string {
 		return m.operationPage.View()
 	case helpMenuPage:
 		return m.helpMenuPage.View()
+	case helpPage:
+		return m.helpPage.View()
 	case aboutPage:
 		return m.aboutPage.View()
 	default:
@@ -281,6 +308,8 @@ func (m model) statusbarInfoString() string {
 		return ""
 	case helpMenuPage:
 		return ""
+	case helpPage:
+		return ""
 	case aboutPage:
 		return ""
 	default:
@@ -303,6 +332,8 @@ func (m model) statusMessageString() string {
 	case operationPage:
 		return ""
 	case helpMenuPage:
+		return ""
+	case helpPage:
 		return ""
 	case aboutPage:
 		return ""

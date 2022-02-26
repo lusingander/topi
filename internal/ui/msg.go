@@ -26,6 +26,18 @@ func selectHelpMenu() tea.Msg {
 	return selectHelpMenuMsg{}
 }
 
+type selectHelpHelpMenuMsg struct{}
+
+func selectHelpHelpMenu() tea.Msg {
+	return selectHelpHelpMenuMsg{}
+}
+
+type toggleHelpMsg struct{}
+
+func toggleHelp() tea.Msg {
+	return toggleHelpMsg{}
+}
+
 type selectAboutMenuMsg struct{}
 
 func selectAboutMenu() tea.Msg {
