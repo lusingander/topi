@@ -68,3 +68,202 @@ func TestMergeTags(t *testing.T) {
 		t.Errorf("got=%v, want=%v", got, want)
 	}
 }
+
+func TestMergedAllOf(t *testing.T) {
+	tests := []struct {
+		schema *Schema
+		want   *Schema
+	}{
+		{
+			schema: &Schema{
+				AllOf: []*Schema{
+					{
+						Type: "integer",
+					},
+					{
+						Type: "string",
+					},
+				},
+			},
+			want: &Schema{
+				Type: "string",
+			},
+		},
+		{
+			schema: &Schema{
+				AllOf: []*Schema{
+					{
+						Type: "integer",
+					},
+					{
+						Type: "object",
+						Properties: map[string]*Schema{
+							"foo": {
+								Type: "string",
+							},
+						},
+					},
+				},
+			},
+			want: &Schema{
+				Type: "object",
+				Properties: map[string]*Schema{
+					"foo": {
+						Type: "string",
+					},
+				},
+			},
+		},
+		{
+			schema: &Schema{
+				AllOf: []*Schema{
+					{
+						Type: "object",
+						Properties: map[string]*Schema{
+							"foo": {
+								Type:   "integer",
+								Format: "int32",
+							},
+							"bar": {
+								Type: "integer",
+							},
+						},
+						Required: []string{"foo"},
+					},
+					{
+						Type: "object",
+						Properties: map[string]*Schema{
+							"bar": {
+								Type: "string",
+							},
+							"baz": {
+								Type:   "string",
+								Format: "password",
+							},
+						},
+						Required: []string{"bar"},
+					},
+				},
+			},
+			want: &Schema{
+				Type: "object",
+				Properties: map[string]*Schema{
+					"foo": {
+						Type:   "integer",
+						Format: "int32",
+					},
+					"bar": {
+						Type: "string",
+					},
+					"baz": {
+						Type:   "string",
+						Format: "password",
+					},
+				},
+				Required: []string{"foo", "bar"},
+			},
+		},
+		{
+			schema: &Schema{
+				AllOf: []*Schema{
+					{
+						Type: "object",
+						Properties: map[string]*Schema{
+							"foo": {
+								Type:         "integer",
+								Min:          float64Pointer(10),
+								Max:          float64Pointer(30),
+								ExclusiveMin: true,
+								ExclusiveMax: true,
+								MultipleOf:   float64Pointer(5),
+							},
+						},
+					},
+					{
+						Type: "object",
+						Properties: map[string]*Schema{
+							"bar": {
+								Type:      "string",
+								MinLength: 8,
+								MaxLength: uint64Pointer(32),
+								Pattern:   "/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/",
+							},
+						},
+					},
+				},
+			},
+			want: &Schema{
+				Type: "object",
+				Properties: map[string]*Schema{
+					"foo": {
+						Type:         "integer",
+						Min:          float64Pointer(10),
+						Max:          float64Pointer(30),
+						ExclusiveMin: true,
+						ExclusiveMax: true,
+						MultipleOf:   float64Pointer(5),
+					},
+					"bar": {
+						Type:      "string",
+						MinLength: 8,
+						MaxLength: uint64Pointer(32),
+						Pattern:   "/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/",
+					},
+				},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		got := test.schema.MergedAllOf()
+		if !reflect.DeepEqual(got, test.want) {
+			t.Errorf("got=%v, want=%v", got, test.want)
+		}
+	}
+}
+
+func TestMergedAllOf_NoSideEffect(t *testing.T) {
+	schema := &Schema{
+		AllOf: []*Schema{
+			{
+				Type:       "object",
+				Properties: map[string]*Schema{"foo": {Type: "integer"}},
+			},
+			{
+				Type:       "object",
+				Properties: map[string]*Schema{"bar": {Type: "string"}},
+			},
+		},
+	}
+	want := &Schema{
+		Type:       "object",
+		Properties: map[string]*Schema{"foo": {Type: "integer"}, "bar": {Type: "string"}},
+	}
+	schemaWant := &Schema{
+		AllOf: []*Schema{
+			{
+				Type:       "object",
+				Properties: map[string]*Schema{"foo": {Type: "integer"}},
+			},
+			{
+				Type:       "object",
+				Properties: map[string]*Schema{"bar": {Type: "string"}},
+			},
+		},
+	}
+	got := schema.MergedAllOf()
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got=%v, want=%v", got, want)
+	}
+	if !reflect.DeepEqual(schema, schemaWant) {
+		t.Errorf("before=%v, after=%v", schema, schemaWant)
+	}
+}
+
+func float64Pointer(v float64) *float64 {
+	return &v
+}
+
+func uint64Pointer(v uint64) *uint64 {
+	return &v
+}

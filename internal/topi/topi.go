@@ -206,6 +206,35 @@ type Schema struct {
 	Properties map[string]*Schema
 }
 
+func (s *Schema) MergedAllOf() *Schema {
+	if len(s.AllOf) == 0 {
+		return nil
+	}
+	ret := &Schema{}
+	for _, schema := range s.AllOf {
+		if schema.Type != "" {
+			ret.Type = schema.Type
+		}
+		if len(schema.Properties) > 0 {
+			if ret.Properties == nil {
+				ret.Properties = make(map[string]*Schema)
+			}
+			for k, v := range schema.Properties {
+				if prop, ok := ret.Properties[k]; ok {
+					sc := &Schema{AllOf: []*Schema{prop, v}}
+					ret.Properties[k] = sc.MergedAllOf()
+				} else {
+					ret.Properties[k] = v
+				}
+			}
+		}
+		if len(schema.Required) > 0 {
+			ret.Required = append(ret.Required, schema.Required...)
+		}
+	}
+	return ret
+}
+
 type RequestBody struct {
 	Description string
 	Required    bool

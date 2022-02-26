@@ -8,6 +8,9 @@ import (
 )
 
 func schemaTypeString(sc *topi.Schema) string {
+	if len(sc.AllOf) > 0 {
+		return schemaTypeString(sc.MergedAllOf())
+	}
 	if len(sc.OneOf) > 0 {
 		ss := make([]string, len(sc.OneOf))
 		for i, s := range sc.OneOf {

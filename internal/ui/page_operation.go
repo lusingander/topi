@@ -323,6 +323,9 @@ func (operationPageModel) styledHeaders(headers []*topi.Header) string {
 }
 
 func styledSchema(sc *topi.Schema, indentLevel int, read bool) string {
+	if len(sc.AllOf) > 0 {
+		return styledSchema(sc.MergedAllOf(), indentLevel, read)
+	}
 	if sc.Type == "object" {
 
 		nameAreaWidth := 0
@@ -349,6 +352,13 @@ func styledSchema(sc *topi.Schema, indentLevel int, read bool) string {
 			ss := styledSingleParam(prop, name, prop.Description, required, prop.Deprecated, nameAreaWidth, indentLevel)
 			strs = append(strs, ss...)
 
+			if len(prop.AllOf) > 0 {
+				merged := prop.MergedAllOf()
+				if merged.Type == "object" || (merged.Type == "array" && merged.Items.Type == "object") {
+					s := styledSchema(merged, indentLevel+1, read)
+					strs = append(strs, s)
+				}
+			}
 			if len(prop.OneOf) > 0 {
 				for i, schema := range prop.OneOf {
 					if schema.Type == "object" {
