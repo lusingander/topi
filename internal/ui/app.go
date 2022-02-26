@@ -69,6 +69,10 @@ type aboutPage struct{}
 
 func (aboutPage) crumb() string { return "about" }
 
+type creditsPage struct{}
+
+func (creditsPage) crumb() string { return "credits" }
+
 type pageStack struct {
 	stack []page
 }
@@ -119,6 +123,7 @@ type model struct {
 	helpMenuPage  helpMenuPageModel
 	helpPage      helpPageModel
 	aboutPage     aboutPageModel
+	creditsPage   creditsPageModel
 
 	width, height int
 }
@@ -139,6 +144,7 @@ func newModel(doc *topi.Document) model {
 		helpMenuPage:  newHelpMenuPageModel(),
 		helpPage:      newHelpPageModel(),
 		aboutPage:     newAboutPageModel(),
+		creditsPage:   newCreditsPageModel(),
 	}
 }
 
@@ -159,6 +165,7 @@ func (m *model) SetSize(w, h int) {
 	m.helpMenuPage.SetSize(w, h)
 	m.helpPage.SetSize(w, h)
 	m.aboutPage.SetSize(w, h)
+	m.creditsPage.SetSize(w, h)
 }
 
 func (m *model) toggleHelp() {
@@ -200,6 +207,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.pushPage(helpPage{})
 	case selectAboutMenuMsg:
 		m.pushPage(aboutPage{})
+	case selectCreditsMenuMsg:
+		m.pushPage(creditsPage{})
 	case selectTagMsg:
 		m.pushPage(tagPathsPage(msg))
 	case selectOperationMsg:
@@ -235,6 +244,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case aboutPage:
 		m.aboutPage, cmd = m.aboutPage.Update(msg)
 		return m, cmd
+	case creditsPage:
+		m.creditsPage, cmd = m.creditsPage.Update(msg)
+		return m, cmd
 	default:
 		return m, nil
 	}
@@ -267,6 +279,8 @@ func (m model) content() string {
 		return m.helpPage.View()
 	case aboutPage:
 		return m.aboutPage.View()
+	case creditsPage:
+		return m.creditsPage.View()
 	default:
 		return "error... :("
 	}
@@ -312,6 +326,8 @@ func (m model) statusbarInfoString() string {
 		return ""
 	case aboutPage:
 		return ""
+	case creditsPage:
+		return ""
 	default:
 		return "error... :("
 	}
@@ -336,6 +352,8 @@ func (m model) statusMessageString() string {
 	case helpPage:
 		return ""
 	case aboutPage:
+		return ""
+	case creditsPage:
 		return ""
 	default:
 		return "error... :("

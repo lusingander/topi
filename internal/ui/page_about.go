@@ -17,7 +17,7 @@ var (
 				Bold(true)
 
 	aboutPageTitleBarStyle = lipgloss.NewStyle().
-				Padding(1, 2)
+				Padding(0, 2, 1)
 
 	aboutPageUrlStyle = lipgloss.NewStyle().
 				Foreground(lipgloss.Color("33")).

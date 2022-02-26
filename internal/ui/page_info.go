@@ -20,7 +20,7 @@ var (
 				Foreground(lipgloss.Color("70"))
 
 	infoPageTitleBarStyle = lipgloss.NewStyle().
-				Padding(1, 2)
+				Padding(0, 2, 1)
 
 	infoPageDescriptionStyle = lipgloss.NewStyle().
 					Padding(1, 2)

@@ -3,6 +3,7 @@ module github.com/lusingander/topi
 go 1.17
 
 require (
+	github.com/Songmu/gocredits v0.2.0
 	github.com/charmbracelet/bubbles v0.10.3
 	github.com/charmbracelet/bubbletea v0.20.0
 	github.com/charmbracelet/glamour v0.5.0

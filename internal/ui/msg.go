@@ -44,6 +44,12 @@ func selectAboutMenu() tea.Msg {
 	return selectAboutMenuMsg{}
 }
 
+type selectCreditsMenuMsg struct{}
+
+func selectCreditsMenu() tea.Msg {
+	return selectCreditsMenuMsg{}
+}
+
 type selectTagMsg struct {
 	tag string
 }

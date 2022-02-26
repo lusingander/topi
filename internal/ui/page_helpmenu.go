@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	helpMenuPageHelpMenu  = "Help"
-	helpMenuPageAboutMenu = "About"
+	helpMenuPageHelpMenu    = "Help"
+	helpMenuPageAboutMenu   = "About"
+	helpMenuPageCreditsMenu = "Credits"
 )
 
 var helpMenuPageItems = []list.Item{
@@ -19,6 +20,10 @@ var helpMenuPageItems = []list.Item{
 	helpMenuPageListItem{
 		title:       helpMenuPageAboutMenu,
 		description: "Show about this application",
+	},
+	helpMenuPageListItem{
+		title:       helpMenuPageCreditsMenu,
+		description: "Show license information for this application",
 	},
 }
 
@@ -81,6 +86,8 @@ func (m helpMenuPageModel) Update(msg tea.Msg) (helpMenuPageModel, tea.Cmd) {
 				return m, selectHelpHelpMenu
 			case helpMenuPageAboutMenu:
 				return m, selectAboutMenu
+			case helpMenuPageCreditsMenu:
+				return m, selectCreditsMenu
 			}
 			return m, nil
 		case key.Matches(msg, m.delegateKeys.back):

@@ -4,6 +4,12 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+)
+
+var (
+	helpPageContentStyle = lipgloss.NewStyle().
+		Padding(0, 2)
 )
 
 const helpPageContent = `# Help page
@@ -95,7 +101,7 @@ func (m *helpPageModel) reset() {
 func (m *helpPageModel) updateContent() {
 	r, _ := markdownRenderer(m.width - 10)
 	content, _ := r.Render(helpPageContent)
-	m.viewport.SetContent(content)
+	m.viewport.SetContent(helpPageContentStyle.Render(content))
 }
 
 func (m helpPageModel) Init() tea.Cmd {
