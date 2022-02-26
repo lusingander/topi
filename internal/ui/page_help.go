@@ -109,7 +109,7 @@ func (m helpPageModel) Update(msg tea.Msg) (helpPageModel, tea.Cmd) {
 		case key.Matches(msg, m.delegateKeys.back):
 			return m, goBack
 		}
-	case selectHelpMenuMsg:
+	case selectHelpHelpMenuMsg, toggleHelpMsg:
 		m.reset()
 		m.updateContent()
 		return m, nil
