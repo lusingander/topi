@@ -85,6 +85,9 @@ var (
 	operationPageSchemaIndentColorStyle = lipgloss.NewStyle().
 						Foreground(lipgloss.Color("238"))
 
+	operationPageSchemaOneOfMarkerColorStyle = lipgloss.NewStyle().
+							Foreground(lipgloss.Color("246"))
+
 	operationPageItemStyle = lipgloss.NewStyle().
 				Padding(1, 2)
 )
@@ -346,6 +349,17 @@ func styledSchema(sc *topi.Schema, indentLevel int, read bool) string {
 			ss := styledSingleParam(prop, name, prop.Description, required, prop.Deprecated, nameAreaWidth, indentLevel)
 			strs = append(strs, ss...)
 
+			if len(prop.OneOf) > 0 {
+				for i, schema := range prop.OneOf {
+					if schema.Type == "object" {
+						schemaIndent, _ := schemaIndent(indentLevel + 1) // indent++
+						marker := fmt.Sprintf("object[%d]", i+1)
+						s := schemaIndent + operationPageSchemaOneOfMarkerColorStyle.Render(marker)
+						t := styledSchema(schema, indentLevel+2, read) // indent++++
+						strs = append(strs, s, t)
+					}
+				}
+			}
 			if prop.Type == "object" {
 				ss := styledProperties(prop, indentLevel+1, read)
 				strs = append(strs, ss...)
@@ -408,8 +422,8 @@ func styledProperties(sc *topi.Schema, indentLevel int, read bool) []string {
 func styledSingleParam(schema *topi.Schema, name, description string, required, deprecated bool, nameAreaWidth, indentLevel int) []string {
 	strs := make([]string, 0)
 
-	schemaIndent := strings.Repeat(">>", indentLevel)
-	descIndent := strings.Repeat(" ", nameAreaWidth+len(schemaIndent))
+	schemaIndent, scl := schemaIndent(indentLevel)
+	descIndent := strings.Repeat(" ", nameAreaWidth+scl)
 
 	var s strings.Builder
 
@@ -481,6 +495,11 @@ func styledSingleParam(schema *topi.Schema, name, description string, required, 
 		}
 	}
 	return strs
+}
+
+func schemaIndent(indentLevel int) (string, int) {
+	schemaIndent := strings.Repeat(">>", indentLevel)
+	return operationPageSchemaIndentColorStyle.Render(schemaIndent), len(schemaIndent)
 }
 
 func (m operationPageModel) styledMethod() string {

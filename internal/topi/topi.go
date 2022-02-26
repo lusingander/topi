@@ -181,6 +181,8 @@ type Schema struct {
 	Deprecated  bool
 	ReadOnly    bool
 	WriteOnly   bool
+	OneOf       []*Schema
+	AllOf       []*Schema
 
 	// number/integer
 	Min          *float64

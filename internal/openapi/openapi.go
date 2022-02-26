@@ -194,14 +194,16 @@ func convertSchema(schema *openapi3.SchemaRef) *topi.Schema {
 	}
 	sc := schema.Value
 	return &topi.Schema{
-		Type:         sc.Type,
-		Format:       sc.Format,
-		Default:      sc.Default,
-		Enum:         sc.Enum,
-		Description:  sc.Description,
-		Deprecated:   sc.Deprecated,
-		ReadOnly:     sc.ReadOnly,
-		WriteOnly:    sc.WriteOnly,
+		Type:        sc.Type,
+		Format:      sc.Format,
+		Default:     sc.Default,
+		Enum:        sc.Enum,
+		Description: sc.Description,
+		Deprecated:  sc.Deprecated,
+		ReadOnly:    sc.ReadOnly,
+		WriteOnly:   sc.WriteOnly,
+		OneOf:       convertSchemaRefs(sc.OneOf),
+		// AllOf:        convertSchemaRefs(sc.AllOf),
 		Min:          sc.Min,
 		Max:          sc.Max,
 		ExclusiveMin: sc.ExclusiveMin,
@@ -222,6 +224,14 @@ func convertSchemas(s openapi3.Schemas) map[string]*topi.Schema {
 	ret := make(map[string]*topi.Schema)
 	for k, v := range s {
 		ret[k] = convertSchema(v)
+	}
+	return ret
+}
+
+func convertSchemaRefs(ss openapi3.SchemaRefs) []*topi.Schema {
+	ret := make([]*topi.Schema, len(ss))
+	for i, s := range ss {
+		ret[i] = convertSchema(s)
 	}
 	return ret
 }

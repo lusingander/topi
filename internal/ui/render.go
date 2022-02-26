@@ -8,6 +8,18 @@ import (
 )
 
 func schemaTypeString(sc *topi.Schema) string {
+	if len(sc.OneOf) > 0 {
+		ss := make([]string, len(sc.OneOf))
+		for i, s := range sc.OneOf {
+			if s.Type == "object" {
+				ss[i] = fmt.Sprintf("%s[%d]", s.Type, i+1)
+			} else {
+				ss[i] = s.Type
+			}
+		}
+		return fmt.Sprintf("one of (%s)", strings.Join(ss, " | "))
+	}
+
 	var s strings.Builder
 	if sc.Type != "" {
 		if sc.Type == "array" {
