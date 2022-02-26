@@ -7,6 +7,85 @@ import (
 	"github.com/lusingander/topi/internal/topi"
 )
 
+func TestSchemaTypeString(t *testing.T) {
+	tests := []struct {
+		schema *topi.Schema
+		want   string
+	}{
+		{
+			schema: &topi.Schema{},
+			want:   "",
+		},
+		{
+			schema: &topi.Schema{
+				Type: "integer",
+			},
+			want: "integer",
+		},
+		{
+			schema: &topi.Schema{
+				Type:   "string",
+				Format: "password",
+			},
+			want: "string(password)",
+		},
+		{
+			schema: &topi.Schema{
+				Type: "array",
+				Items: &topi.Schema{
+					Type: "boolean",
+				},
+			},
+			want: "array of boolean",
+		},
+		{
+			schema: &topi.Schema{
+				Type: "object",
+				Properties: map[string]*topi.Schema{
+					"foo": {Type: "number"},
+				},
+			},
+			want: "object",
+		},
+		{
+			schema: &topi.Schema{
+				OneOf: []*topi.Schema{
+					{Type: "integer"},
+					{Type: "object", Properties: map[string]*topi.Schema{}},
+					{Type: "string"},
+					{Type: "object", Properties: map[string]*topi.Schema{}},
+				},
+			},
+			want: "one of (integer | object[2] | string | object[4])",
+		},
+		{
+			schema: &topi.Schema{
+				AllOf: []*topi.Schema{
+					{Type: "integer"},
+					{Type: "boolean"},
+					{Type: "string"},
+				},
+			},
+			want: "string",
+		},
+		{
+			schema: &topi.Schema{
+				AllOf: []*topi.Schema{
+					{Type: "object", Properties: map[string]*topi.Schema{}},
+					{Type: "object", Properties: map[string]*topi.Schema{}},
+				},
+			},
+			want: "object",
+		},
+	}
+	for _, test := range tests {
+		got := schemaTypeString(test.schema)
+		if got != test.want {
+			t.Errorf("got=%v, want=%v", got, test.want)
+		}
+	}
+}
+
 func TestSchemaConstraintStrings(t *testing.T) {
 	tests := []struct {
 		schema *topi.Schema
