@@ -15,6 +15,7 @@ var (
 				Padding(0, 2)
 
 	creditsPageRepositoryNameStyle = lipgloss.NewStyle().
+					Foreground(lipgloss.Color("70")).
 					Bold(true)
 
 	creditsPageUrlStyle = lipgloss.NewStyle().
