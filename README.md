@@ -4,9 +4,13 @@ Terminal OpenAPI documentation viewer 🐐
 
 ## About
 
+> topi is still under development... 🐐
+
 topi is the documentation viewer for OpenAPI v3 definitions in the terminal.
 
-> topi is still under development... 🐐
+<img src="./img/image.gif" width=800>
+
+(This image show https://github.com/github/rest-api-description)
 
 ## Installation
 
