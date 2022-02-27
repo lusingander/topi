@@ -46,7 +46,7 @@ keybindings for list-syle pages
 |Enter|(default) select item, (filtering) apply filter|
 |Esc|(filtering) cancel filter, (filter applied) remove filter|
 
-## Document page
+### Document page
 
 keybindings for document pages 
 
@@ -60,6 +60,12 @@ keybindings for document pages
 |u|half page up|
 |Tab|select link|
 |x|open selecting link|
+
+specific to the credits page
+
+|Key|Description|
+|-|-|
+|<kbd>t</kbd>|toggle credits list|
 `
 
 type helpPageModel struct {

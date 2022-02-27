@@ -67,6 +67,12 @@ keybindings for document pages
 |<kbd>Tab</kbd>|select link|
 |<kbd>x</kbd>|open selecting link|
 
+specific to the credits page
+
+|Key|Description|
+|-|-|
+|<kbd>t</kbd>|toggle credits list|
+
 ## License
 
 MIT
