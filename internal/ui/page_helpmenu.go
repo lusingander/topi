@@ -66,6 +66,10 @@ func newHelpMenuPageDelegateKeyMap() helpMenuPageDelegateKeyMap {
 	}
 }
 
+func (m *helpMenuPageModel) reset() {
+	m.list.ResetSelected()
+}
+
 func (m *helpMenuPageModel) SetSize(w, h int) {
 	m.width, m.height = w, h
 	m.list.SetSize(w, h)
@@ -93,6 +97,9 @@ func (m helpMenuPageModel) Update(msg tea.Msg) (helpMenuPageModel, tea.Cmd) {
 		case key.Matches(msg, m.delegateKeys.back):
 			return m, goBack
 		}
+	case selectHelpMenuMsg:
+		m.reset()
+		return m, nil
 	}
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
