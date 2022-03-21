@@ -16,7 +16,7 @@ topi is the documentation viewer for OpenAPI v3 definitions in the terminal.
 
 `$ go install github.com/lusingander/topi@latest`
 
-(require Go 1.17+)
+(require Go 1.18+)
 
 ## Usage
 

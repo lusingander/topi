@@ -171,11 +171,11 @@ func TestMergedAllOf(t *testing.T) {
 						Properties: map[string]*Schema{
 							"foo": {
 								Type:         "integer",
-								Min:          float64Pointer(10),
-								Max:          float64Pointer(30),
+								Min:          ptr[float64](10),
+								Max:          ptr[float64](30),
 								ExclusiveMin: true,
 								ExclusiveMax: true,
-								MultipleOf:   float64Pointer(5),
+								MultipleOf:   ptr[float64](5),
 							},
 						},
 					},
@@ -185,7 +185,7 @@ func TestMergedAllOf(t *testing.T) {
 							"bar": {
 								Type:      "string",
 								MinLength: 8,
-								MaxLength: uint64Pointer(32),
+								MaxLength: ptr[uint64](32),
 								Pattern:   "/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/",
 							},
 						},
@@ -197,16 +197,16 @@ func TestMergedAllOf(t *testing.T) {
 				Properties: map[string]*Schema{
 					"foo": {
 						Type:         "integer",
-						Min:          float64Pointer(10),
-						Max:          float64Pointer(30),
+						Min:          ptr[float64](10),
+						Max:          ptr[float64](30),
 						ExclusiveMin: true,
 						ExclusiveMax: true,
-						MultipleOf:   float64Pointer(5),
+						MultipleOf:   ptr[float64](5),
 					},
 					"bar": {
 						Type:      "string",
 						MinLength: 8,
-						MaxLength: uint64Pointer(32),
+						MaxLength: ptr[uint64](32),
 						Pattern:   "/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/",
 					},
 				},
@@ -260,10 +260,6 @@ func TestMergedAllOf_NoSideEffect(t *testing.T) {
 	}
 }
 
-func float64Pointer(v float64) *float64 {
-	return &v
-}
-
-func uint64Pointer(v uint64) *uint64 {
+func ptr[T any](v T) *T {
 	return &v
 }

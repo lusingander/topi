@@ -94,8 +94,8 @@ func TestSchemaConstraintStrings(t *testing.T) {
 		{
 			schema: &topi.Schema{
 				Type: "number",
-				Min:  float64Pointer(1),
-				Max:  float64Pointer(10),
+				Min:  ptr[float64](1),
+				Max:  ptr[float64](10),
 			},
 			want: []string{
 				"1 <= n <= 10",
@@ -104,8 +104,8 @@ func TestSchemaConstraintStrings(t *testing.T) {
 		{
 			schema: &topi.Schema{
 				Type:         "number",
-				Min:          float64Pointer(-123.45),
-				Max:          float64Pointer(0),
+				Min:          ptr(-123.45),
+				Max:          ptr[float64](0),
 				ExclusiveMin: true,
 				ExclusiveMax: true,
 			},
@@ -116,7 +116,7 @@ func TestSchemaConstraintStrings(t *testing.T) {
 		{
 			schema: &topi.Schema{
 				Type:       "integer",
-				MultipleOf: float64Pointer(5),
+				MultipleOf: ptr[float64](5),
 			},
 			want: []string{
 				"multiple of 5",
@@ -125,8 +125,8 @@ func TestSchemaConstraintStrings(t *testing.T) {
 		{
 			schema: &topi.Schema{
 				Type:       "number",
-				Max:        float64Pointer(20),
-				MultipleOf: float64Pointer(0.5),
+				Max:        ptr[float64](20),
+				MultipleOf: ptr(0.5),
 			},
 			want: []string{
 				"n <= 20",
@@ -137,7 +137,7 @@ func TestSchemaConstraintStrings(t *testing.T) {
 			schema: &topi.Schema{
 				Type:      "string",
 				MinLength: 1,
-				MaxLength: uint64Pointer(30),
+				MaxLength: ptr[uint64](30),
 				Pattern:   "/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/",
 			},
 			want: []string{
@@ -149,7 +149,7 @@ func TestSchemaConstraintStrings(t *testing.T) {
 			schema: &topi.Schema{
 				Type:     "array",
 				MinItems: 2,
-				MaxItems: uint64Pointer(5),
+				MaxItems: ptr[uint64](5),
 			},
 			want: []string{
 				"2 <= items <= 5",

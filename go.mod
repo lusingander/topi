@@ -1,6 +1,6 @@
 module github.com/lusingander/topi
 
-go 1.17
+go 1.18
 
 require (
 	github.com/Songmu/gocredits v0.2.0

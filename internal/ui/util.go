@@ -26,23 +26,7 @@ func containsString(v string, ss []string) bool {
 	return false
 }
 
-func boolPtr(b bool) *bool {
-	return &b
-}
-
-func stringPtr(s string) *string {
-	return &s
-}
-
-func uintPtr(u uint) *uint {
-	return &u
-}
-
-func float64Pointer(v float64) *float64 {
-	return &v
-}
-
-func uint64Pointer(v uint64) *uint64 {
+func ptr[T any](v T) *T {
 	return &v
 }
 
